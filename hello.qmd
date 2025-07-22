@@ -1,0 +1,12 @@
+---
+title: "WebR Test"
+format: html
+filters:
+  - webr
+---
+
+```{webr-r}
+# Test WebR installation
+print("Hello WebR!")
+2 + 2
+```
