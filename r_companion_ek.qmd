@@ -1,0 +1,1367 @@
+---
+title: "2025 Practical Statistics for Medical Research"
+subtitle: "Interactive R Companion for SPSS Users"
+author: "Jan Hughes-Austin and D. Eastern Kang Sim"
+date: "`r Sys.Date()`"
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-location: left
+    toc-expand: 2
+    toc-title: "Sessions"
+    code-fold: false
+    code-tools: true
+    embed-resources: true
+filters:
+  - webr
+webr:
+  packages: ['tidyverse', 
+  'DT', 'knitr', 
+  'kableExtra', 'psych', 
+  'pwr', 'ggplot2', 'dplyr', 'corrr']
+---
+
+<style>
+.sidebar-nav {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.comparison-box {
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  padding: 15px;
+  margin: 10px 0;
+  background-color: #f8f9fa;
+}
+
+.spss-output {
+  background-color: #fff3cd;
+  border-left: 4px solid #856404;
+}
+
+.r-output {
+  background-color: #d4edda;
+  border-left: 4px solid #155724;
+}
+</style>
+
+## Welcome to Your R Companion
+
+### Important Note: This is a Learning Companion, Not a Replacement
+
+::: {.callout-important}
+## Companion, Not Substitute
+This interactive guide serves as a **learning companion** to your SPSS-based statistics course, not a replacement. While your primary instruction uses SPSS, this resource helps you explore how the same statistical concepts and analyses can be implemented in R. 
+:::
+
+### Why Learn R for Statistics?
+
+`R` is a free and open-source programming language specifically designed for statistical computing and data analysis. Unlike proprietary software, R offers several key advantages for scientific research:
+
+**Reproducibility**: R scripts document every step of your analysis, making your research completely reproducible. Anyone can see exactly what you did and replicate your results.
+
+**Flexibility**: With thousands of packages (libraries) available, R can handle virtually any statistical method or data visualization need.
+
+### Introduction to the Tidyverse
+
+The `tidyverse` is "a collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures." This collection of packages makes data analysis more intuitive and efficient.
+
+**Core Philosophy**: Tidy datasets are easier to manipulate, model, and visualize because the tidy data principles impose a general framework and a consistent set of rules on data.
+
+**The Pipe Operator (`%>%`)**: One of the most powerful features of tidyverse is the pipe operator, which allows you to chain operations together in a readable way:
+
+```r
+# Instead of nested functions (hard to read)
+result <- function3(function2(function1(data, arg1), arg2), arg3)
+
+# Use pipes (reads left to right, top to bottom)
+result <- data %>%
+  function1(arg1) %>%
+  function2(arg2) %>%
+  function3(arg3)
+```
+
+This approach makes your code more readable and mirrors how you think about data analysis: "take the data, then do this, then do that."
+
+### Getting Started
+
+::: {.callout-tip}
+## Interactive Learning
+All code blocks in this companion are interactive! You can modify and run them directly in your browser. This hands-on approach helps you learn by doing, which is essential for mastering both statistical concepts and R programming.
+:::
+
+---
+
+# Session 1: Concepts of Measurement {#session1}
+
+## Understanding Variables and Measurement Scales
+
+In statistics, understanding the type of data you're working with is crucial for choosing appropriate analytical methods. Let's explore the different types of variables using R and visualizations.
+
+```{webr-r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# ========================================
+# DATASET CREATION - HIDDEN FROM HTML OUTPUT
+# ========================================
+# This code creates the datasets but doesn't show in the final HTML
+
+# Option 1: Manual data entry (replace with your actual data)
+# MODIFY THIS SECTION with your real data values:
+
+# Diet Dataset - Manual entry of actual diet45ex.csv data
+diet_data <- tibble(
+  ID = 1:45,
+  Sex = c(rep(0, 13), rep(1, 32)),  # 13 women, 32 men
+  fdwt3 = c(412, 389, 541, 432, 520, 340, 567, 623, 445, 398, 401, 567, 523,  # Women
+           856, 923, 1065, 789, 678, 734, 856, 945, 812, 723, 698, 756, 823, 867,  # Men
+           912, 734, 623, 789, 856, 923, 734, 678, 756, 812, 867, 923, 789, 856,
+           734, 678, 812, 756, 823),
+  kcal3 = c(1327, 1827, 2313, 1760, 1708, 1196, 1855, 2821, 1588, 1340, 1352, 2212, 1902,  # Women
+           2559, 2714, 3639, 2175, 1868, 2020, 2559, 2605, 2238, 1995, 1924, 2084, 2268,  # Men  
+           2393, 2516, 2020, 1717, 2175, 2559, 2714, 2020, 1868, 2084, 2238, 2393, 2516,
+           2175, 2559, 2020, 2238, 2084, 2268),
+  # Add other variables with realistic values or your actual data
+  prot3gm = c(round(rnorm(45, mean = 85, sd = 25), 1)),
+  fat3gm = c(round(rnorm(45, mean = 90, sd = 30), 1)),
+  cho3gm = c(round(rnorm(45, mean = 280, sd = 80), 1)),
+  ncal3gm = c(round(rnorm(45, mean = 15, sd = 5), 1)),
+  pctfat3 = c(round(rnorm(45, mean = 35, sd = 8), 1)),
+  pctcho3 = c(round(rnorm(45, mean = 45, sd = 10), 1)),
+  pctpro3 = c(round(rnorm(45, mean = 20, sd = 5), 1)),
+  Exercise2 = c(sample(0:2, 45, replace = TRUE)),
+  Exercise_Sex = NA
+) %>%
+  mutate(
+    # Ensure realistic ranges
+    kcal3 = pmax(800, pmin(4500, kcal3)),
+    prot3gm = pmax(20, prot3gm),
+    fat3gm = pmax(20, fat3gm),
+    cho3gm = pmax(100, cho3gm),
+    # Create derived variables
+    Exercise_Sex = paste0(Exercise2, "_", Sex),
+    Sex_label = ifelse(Sex == 0, "Female", "Male"),
+    Exercise_label = case_when(
+      Exercise2 == 0 ~ "Control",
+      Exercise2 == 1 ~ "Aerobic",
+      Exercise2 == 2 ~ "Resistance"
+    )
+  )
+
+# Muscle Dataset - Manual entry
+muscle_data <- tibble(
+  AnimalID = 1:18,
+  MuscleType = rep(1:2, each = 9),
+  FiberArea = c(2156, 2298, 2445, 2634, 2789, 2345, 2567, 2223, 2456,  # Type 1
+               3234, 3456, 3123, 3567, 3789, 3234, 3456, 3321, 3445)   # Type 2
+) %>%
+  mutate(
+    MuscleType_label = ifelse(MuscleType == 1, "Type 1 (Slow)", "Type 2 (Fast)")
+  )
+```
+
+
+### Types of Variables
+
+```{webr-r}
+# Create a comprehensive dataset to demonstrate variable types
+set.seed(123)  # For reproducible results
+
+# Simulate a psychology research dataset
+n_participants <- 200
+
+measurement_demo <- tibble(
+  # Nominal variables (categories with no order)
+  participant_id = 1:n_participants,
+  gender = sample(c("Male", "Female", "Non-binary"), n_participants, 
+                 replace = TRUE, prob = c(0.45, 0.5, 0.05)),
+  treatment_group = sample(c("Control", "Treatment A", "Treatment B"), 
+                          n_participants, replace = TRUE),
+  
+  # Ordinal variables (ordered categories)
+  education_level = sample(c("High School", "Some College", "Bachelor's", 
+                           "Master's", "PhD"), n_participants, replace = TRUE,
+                          prob = c(0.2, 0.25, 0.3, 0.2, 0.05)),
+  satisfaction_rating = sample(1:5, n_participants, replace = TRUE,
+                              prob = c(0.1, 0.15, 0.3, 0.35, 0.1)),
+  
+  # Interval variables (equal intervals, no true zero)
+  temperature_celsius = rnorm(n_participants, mean = 22, sd = 3),
+  
+  # Ratio variables (equal intervals, true zero point)
+  age_years = sample(18:65, n_participants, replace = TRUE),
+  reaction_time_ms = rlnorm(n_participants, meanlog = 6, sdlog = 0.3),
+  income_dollars = rlnorm(n_participants, meanlog = 10.5, sdlog = 0.8),
+  
+  # Discrete variables (countable)
+  num_siblings = rpois(n_participants, lambda = 1.5),
+  num_correct_answers = rbinom(n_participants, size = 20, prob = 0.7)
+) %>%
+  # Order education levels properly
+  mutate(
+    education_level = factor(education_level, 
+                           levels = c("High School", "Some College", 
+                                    "Bachelor's", "Master's", "PhD"),
+                           ordered = TRUE),
+    # Round continuous variables for display
+    temperature_celsius = round(temperature_celsius, 1),
+    reaction_time_ms = round(reaction_time_ms, 0),
+    income_dollars = round(income_dollars, 0)
+  )
+
+# Display the first few rows with variable types
+cat("Sample of our measurement demonstration dataset:\n")
+print(head(measurement_demo))
+
+cat("\nVariable types in our dataset:\n")
+str(measurement_demo)
+```
+
+### Visualizing Different Variable Types
+
+Let's create visualizations that are appropriate for each type of variable:
+
+```{webr-r}
+# 1. NOMINAL DATA: Bar chart for categorical data
+p1 <- measurement_demo %>%
+  ggplot(aes(x = gender, fill = gender)) +
+  geom_bar(alpha = 0.8) +
+  labs(title = "Nominal Variable: Gender Distribution",
+       subtitle = "Categories with no inherent order",
+       x = "Gender", y = "Count") +
+  scale_fill_viridis_d() +
+  theme(legend.position = "none")
+
+print(p1)
+```
+
+```{webr-r}
+# 2. ORDINAL DATA: Bar chart with ordered categories
+p2 <- measurement_demo %>%
+  ggplot(aes(x = education_level, fill = education_level)) +
+  geom_bar(alpha = 0.8) +
+  labs(title = "Ordinal Variable: Education Level",
+       subtitle = "Categories with meaningful order",
+       x = "Education Level", y = "Count") +
+  scale_fill_viridis_d() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none")
+
+print(p2)
+```
+
+```{webr-r}
+# 3. INTERVAL DATA: Histogram for continuous data
+p3 <- measurement_demo %>%
+  ggplot(aes(x = temperature_celsius)) +
+  geom_histogram(bins = 20, fill = "steelblue", alpha = 0.8, color = "white") +
+  geom_vline(aes(xintercept = mean(temperature_celsius)), 
+             color = "red", linetype = "dashed", linewidth = 1) +
+  labs(title = "Interval Variable: Temperature (°C)",
+       subtitle = "Equal intervals, no true zero point",
+       x = "Temperature (°C)", y = "Frequency") +
+  annotate("text", x = mean(measurement_demo$temperature_celsius) + 2, 
+           y = 20, label = "Mean", color = "red")
+
+print(p3)
+```
+
+```{webr-r}
+# 4. RATIO DATA: Histogram with true zero
+p4 <- measurement_demo %>%
+  ggplot(aes(x = age_years)) +
+  geom_histogram(bins = 15, fill = "darkgreen", alpha = 0.8, color = "white") +
+  geom_vline(aes(xintercept = mean(age_years)), 
+             color = "red", linetype = "dashed", linewidth = 1) +
+  labs(title = "Ratio Variable: Age (Years)",
+       subtitle = "Equal intervals with meaningful zero point",
+       x = "Age (Years)", y = "Frequency")
+
+print(p4)
+```
+
+### Variable Classification Exercise
+
+```{webr-r}
+# Let's classify our variables using tidyverse functions
+variable_classification <- measurement_demo %>%
+  # Select a few key variables for classification
+  select(gender, education_level, satisfaction_rating, 
+         temperature_celsius, age_years, num_siblings) %>%
+  # Get summary information about each variable
+  summarise(across(everything(), list(
+    type = ~class(.x)[1],
+    n_unique = ~n_distinct(.x),
+    min_val = ~ifelse(is.numeric(.x), min(.x, na.rm = TRUE), NA),
+    max_val = ~ifelse(is.numeric(.x), max(.x, na.rm = TRUE), NA)
+  ))) %>%
+  # Reshape for better display
+  pivot_longer(everything(), names_to = "variable_stat", values_to = "value") %>%
+  separate(variable_stat, into = c("variable", "statistic"), sep = "_(?=[^_]+$)") %>%
+  pivot_wider(names_from = statistic, values_from = value)
+
+print(variable_classification)
+
+cat("\nClassification Guide:\n")
+cat("• gender: Nominal (categorical, no order)\n")
+cat("• education_level: Ordinal (ordered categories)\n") 
+cat("• satisfaction_rating: Ordinal (1-5 scale)\n")
+cat("• temperature_celsius: Interval (equal intervals, no true zero)\n")
+cat("• age_years: Ratio (equal intervals, true zero)\n")
+cat("• num_siblings: Discrete Ratio (countable, true zero)\n")
+```
+
+## Measurement Error and Reliability
+
+Understanding measurement error is crucial for interpreting statistical results. Let's simulate measurement error to demonstrate its effects:
+
+```{webr-r}
+# Simulate measurement error in a hypothetical experiment
+set.seed(456)
+
+# True underlying values (what we want to measure)
+true_score <- 100
+n_measurements <- 50
+
+# Simulate measurements with different types of error
+measurement_comparison <- tibble(
+  measurement_id = 1:n_measurements,
+  
+  # Perfect measurement (no error) - theoretical
+  perfect = true_score,
+  
+  # Random error only (reliable, unbiased)
+  random_error_only = true_score + rnorm(n_measurements, mean = 0, sd = 5),
+  
+  # Systematic error only (unreliable due to bias)
+  systematic_error_only = true_score + 10,  # Always 10 points too high
+  
+  # Both random and systematic error (most realistic)
+  both_errors = true_score + 10 + rnorm(n_measurements, mean = 0, sd = 5)
+)
+
+# Calculate reliability metrics
+reliability_stats <- measurement_comparison %>%
+  summarise(
+    across(c(random_error_only, systematic_error_only, both_errors), 
+           list(
+             mean = ~mean(.x),
+             sd = ~sd(.x),
+             bias = ~mean(.x) - true_score,
+             mse = ~mean((.x - true_score)^2)  # Mean squared error
+           ),
+           .names = "{.col}_{.fn}")
+  ) %>%
+  pivot_longer(everything(), names_to = "measure_stat", values_to = "value") %>%
+  separate(measure_stat, into = c("error_type", "statistic"), sep = "_(?=[^_]+$)") %>%
+  pivot_wider(names_from = statistic, values_from = value) %>%
+  mutate(across(where(is.numeric), ~round(.x, 2)))
+
+print(reliability_stats)
+
+# Visualize measurement error
+measurement_comparison %>%
+  pivot_longer(cols = -measurement_id, names_to = "error_type", values_to = "measurement") %>%
+  filter(error_type != "perfect") %>%
+  ggplot(aes(x = factor(measurement_id), y = measurement, color = error_type)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_hline(yintercept = true_score, linetype = "dashed", color = "black", linewidth = 1) +
+  labs(title = "Effect of Different Types of Measurement Error",
+       subtitle = "Dashed line shows true score (100)",
+       x = "Measurement Number", y = "Measured Value",
+       color = "Error Type") +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  scale_color_manual(values = c("steelblue", "orange", "red"),
+                     labels = c("Both Errors", "Random Only", "Systematic Only"))
+```
+
+### Reliability and Validity Demonstration
+
+```{webr-r}
+# Create a visual demonstration of reliability vs validity
+set.seed(789)
+
+# Generate data points for four scenarios
+n_points <- 30
+
+reliability_validity_demo <- tibble(
+  # Scenario A: High reliability, low validity (consistent bias)
+  reliable_not_valid_x = rnorm(n_points, mean = 3, sd = 0.5),
+  reliable_not_valid_y = rnorm(n_points, mean = 3, sd = 0.5),
+  
+  # Scenario B: Low reliability, high validity (correct on average)
+  not_reliable_valid_x = rnorm(n_points, mean = 0, sd = 1.5),
+  not_reliable_valid_y = rnorm(n_points, mean = 0, sd = 1.5),
+  
+  # Scenario C: Low reliability, low validity (random and biased)
+  not_reliable_not_valid_x = rnorm(n_points, mean = -3, sd = 1.5),
+  not_reliable_not_valid_y = rnorm(n_points, mean = 3, sd = 1.5),
+  
+  # Scenario D: High reliability, high validity (ideal)
+  reliable_valid_x = rnorm(n_points, mean = 0, sd = 0.4),
+  reliable_valid_y = rnorm(n_points, mean = 0, sd = 0.4)
+) %>%
+  # Reshape for plotting
+  pivot_longer(everything(), names_to = "variable", values_to = "value") %>%
+  separate(variable, into = c("scenario", "coordinate"), sep = "_(?=[xy]$)") %>%
+  pivot_wider(names_from = coordinate, values_from = value) %>%
+  mutate(
+    scenario_label = case_when(
+      scenario == "reliable_not_valid" ~ "A: Reliable, Not Valid",
+      scenario == "not_reliable_valid" ~ "B: Not Reliable, Valid", 
+      scenario == "not_reliable_not_valid" ~ "C: Not Reliable, Not Valid",
+      scenario == "reliable_valid" ~ "D: Reliable & Valid"
+    )
+  )
+
+# Create the target plot
+ggplot(reliability_validity_demo, aes(x = x, y = y, color = scenario_label)) +
+  geom_point(size = 2, alpha = 0.7) +
+  # Add target center (true value)
+  geom_point(aes(x = 0, y = 0), color = "black", size = 4, shape = 3, stroke = 2) +
+  # Add concentric circles to represent target
+  annotate("circle", x = 0, y = 0, r = 1, color = "gray", fill = NA, linetype = "dashed") +
+  annotate("circle", x = 0, y = 0, r = 2, color = "gray", fill = NA, linetype = "dashed") +
+  annotate("circle", x = 0, y = 0, r = 3, color = "gray", fill = NA, linetype = "dashed") +
+  facet_wrap(~scenario_label, ncol = 2) +
+  labs(title = "Reliability vs. Validity: Target Analogy",
+       subtitle = "Target center (+) represents the true value",
+       x = "Measurement Dimension 1", y = "Measurement Dimension 2") +
+  theme(legend.position = "none") +
+  coord_fixed(ratio = 1) +
+  xlim(-5, 5) + ylim(-5, 5)
+```
+
+---
+
+# Session 3: Descriptive Statistics {#session3}
+
+## Overview of Descriptive Statistics
+
+Descriptive statistics summarize and describe the basic features of a dataset so that we can make concise quantitative statements about the data. Let's explore these concepts using R and the tidyverse.
+
+## Creating Sample Data for Analysis
+
+```{webr-r}
+# Load necessary packages and set up
+library(tidyverse)
+library(psych)
+
+# Create a comprehensive dataset similar to the diet study
+set.seed(42)
+n_participants <- 150
+
+# Simulate student academic performance data
+student_performance <- tibble(
+  student_id = 1:n_participants,
+  
+  # Demographics
+  age = sample(18:25, n_participants, replace = TRUE, prob = c(0.1, 0.15, 0.2, 0.2, 0.15, 0.1, 0.05, 0.05)),
+  gender = sample(c("Male", "Female", "Non-binary"), n_participants, 
+                 replace = TRUE, prob = c(0.45, 0.5, 0.05)),
+  year_in_school = sample(1:4, n_participants, replace = TRUE, prob = c(0.3, 0.25, 0.25, 0.2)),
+  
+  # Academic variables (similar to calorie data structure)
+  math_score = rnorm(n_participants, mean = 78, sd = 12),
+  science_score = rnorm(n_participants, mean = 82, sd = 10),
+  english_score = rnorm(n_participants, mean = 75, sd = 15),
+  
+  # Study habits
+  study_hours_week = rpois(n_participants, lambda = 8),
+  
+  # Satisfaction (1-5 scale)
+  course_satisfaction = sample(1:5, n_participants, replace = TRUE,
+                              prob = c(0.05, 0.15, 0.35, 0.35, 0.1))
+) %>%
+  # Ensure scores are within reasonable bounds (0-100)
+  mutate(
+    math_score = pmax(0, pmin(100, math_score)),
+    science_score = pmax(0, pmin(100, science_score)), 
+    english_score = pmax(0, pmin(100, english_score)),
+    
+    # Add some correlation between variables (more realistic)
+    # Students good at math tend to be good at science
+    science_score = science_score + 0.3 * (math_score - mean(math_score)),
+    science_score = pmax(0, pmin(100, science_score))
+  )
+
+# Display first few rows
+cat("Student Performance Dataset (first 10 rows):\n")
+print(head(student_performance, 10))
+
+cat(sprintf("\nDataset dimensions: %d students, %d variables\n", 
+            nrow(student_performance), ncol(student_performance)))
+```
+
+## Measures of Central Tendency
+
+### The Mean, Median, and Mode
+
+```{webr-r}
+# Calculate measures of central tendency using tidyverse
+central_tendency_stats <- student_performance %>%
+  select(math_score, science_score, english_score) %>%
+  summarise(
+    across(everything(), 
+           list(
+             n = ~n(),
+             mean = ~mean(.x, na.rm = TRUE),
+             median = ~median(.x, na.rm = TRUE),
+             # Mode is more complex - find most frequent value
+             mode = ~{
+               tbl <- table(.x)
+               as.numeric(names(tbl)[which.max(tbl)])
+             },
+             # Additional useful statistics
+             min = ~min(.x, na.rm = TRUE),
+             max = ~max(.x, na.rm = TRUE),
+             range = ~max(.x, na.rm = TRUE) - min(.x, na.rm = TRUE)
+           ),
+           .names = "{.col}_{.fn}")
+  ) %>%
+  # Reshape for better display
+  pivot_longer(everything(), names_to = "stat_var", values_to = "value") %>%
+  separate(stat_var, into = c("subject", "statistic"), sep = "_(?=[^_]+$)") %>%
+  pivot_wider(names_from = statistic, values_from = value) %>%
+  mutate(across(where(is.numeric), ~round(.x, 2)))
+
+print(central_tendency_stats)
+
+# Example calculation showing the manual process for math scores
+cat("\n=== MANUAL CALCULATION EXAMPLE: Math Score Mean ===\n")
+math_scores <- student_performance$math_score
+cat(sprintf("Sum of all math scores: %.2f\n", sum(math_scores)))
+cat(sprintf("Number of students: %d\n", length(math_scores)))
+cat(sprintf("Mean = Sum/N = %.2f/%d = %.2f\n", 
+            sum(math_scores), length(math_scores), mean(math_scores)))
+```
+
+### Understanding Skewness Through Visualization
+
+```{webr-r}
+# Create distributions with different skewness to demonstrate mean vs median
+set.seed(123)
+
+skewness_demo <- tibble(
+  # Normal distribution (symmetric)
+  symmetric = rnorm(1000, mean = 50, sd = 10),
+  
+  # Right-skewed (positive skew) - like income data
+  right_skewed = rbeta(1000, shape1 = 2, shape2 = 5) * 100,
+  
+  # Left-skewed (negative skew) - like test scores in easy exam
+  left_skewed = rbeta(1000, shape1 = 5, shape2 = 2) * 100
+) %>%
+  pivot_longer(everything(), names_to = "distribution_type", values_to = "value")
+
+# Calculate mean and median for each distribution
+skew_stats <- skewness_demo %>%
+  group_by(distribution_type) %>%
+  summarise(
+    mean_val = mean(value),
+    median_val = median(value),
+    skewness = psych::skew(value),
+    .groups = 'drop'
+  ) %>%
+  mutate(across(where(is.numeric), ~round(.x, 2)))
+
+print(skew_stats)
+
+# Visualize the distributions
+skewness_demo %>%
+  ggplot(aes(x = value, fill = distribution_type)) +
+  geom_histogram(bins = 30, alpha = 0.7, color = "white") +
+  geom_vline(data = skew_stats, aes(xintercept = mean_val), 
+             color = "red", linetype = "dashed", linewidth = 1) +
+  geom_vline(data = skew_stats, aes(xintercept = median_val), 
+             color = "blue", linetype = "solid", linewidth = 1) +
+  facet_wrap(~distribution_type, scales = "free_y", ncol = 1) +
+  labs(title = "Distribution Shapes and Central Tendency",
+       subtitle = "Red dashed = Mean, Blue solid = Median",
+       x = "Value", y = "Frequency") +
+  theme(legend.position = "none") +
+  scale_fill_viridis_d()
+```
+
+## Measures of Spread (Variability)
+
+### Range, Variance, and Standard Deviation
+
+```{webr-r}
+# Calculate comprehensive measures of spread
+spread_measures <- student_performance %>%
+  select(math_score, science_score, english_score) %>%
+  summarise(
+    across(everything(),
+           list(
+             # Measures of spread
+             range = ~max(.x) - min(.x),
+             variance = ~var(.x),
+             std_dev = ~sd(.x),
+             iqr = ~IQR(.x),
+             
+             # Quartiles
+             q1 = ~quantile(.x, 0.25),
+             q3 = ~quantile(.x, 0.75),
+             
+             # Coefficient of variation (CV)
+             cv = ~(sd(.x) / mean(.x)) * 100
+           ),
+           .names = "{.col}_{.fn}")
+  ) %>%
+  pivot_longer(everything(), names_to = "stat_var", values_to = "value") %>%
+  separate(stat_var, into = c("subject", "statistic"), sep = "_(?=[^_]+$)") %>%
+  pivot_wider(names_from = statistic, values_from = value) %>%
+  mutate(across(where(is.numeric), ~round(.x, 2)))
+
+print(spread_measures)
+
+# Manual calculation example for math score variance
+cat("\n=== MANUAL CALCULATION: Math Score Variance ===\n")
+math_mean <- mean(student_performance$math_score)
+math_deviations <- student_performance$math_score - math_mean
+sum_squared_deviations <- sum(math_deviations^2)
+n_students <- length(student_performance$math_score)
+
+cat(sprintf("Mean math score: %.2f\n", math_mean))
+cat(sprintf("Sum of squared deviations: %.2f\n", sum_squared_deviations))
+cat(sprintf("Sample size: %d\n", n_students))
+cat(sprintf("Sample variance = SS/(n-1) = %.2f/(%d-1) = %.2f\n", 
+            sum_squared_deviations, n_students, 
+            sum_squared_deviations/(n_students-1)))
+cat(sprintf("Sample standard deviation = √variance = %.2f\n", 
+            sqrt(sum_squared_deviations/(n_students-1))))
+```
+
+### Coefficient of Variation Comparison
+
+```{webr-r}
+# Compare variability across different groups using CV
+cv_comparison <- student_performance %>%
+  group_by(gender) %>%
+  summarise(
+    across(c(math_score, science_score, english_score),
+           list(
+             mean = ~mean(.x),
+             sd = ~sd(.x),
+             cv = ~(sd(.x) / mean(.x)) * 100
+           ),
+           .names = "{.col}_{.fn}"),
+    n = n(),
+    .groups = 'drop'
+  ) %>%
+  pivot_longer(cols = -c(gender, n), names_to = "stat_var", values_to = "value") %>%
+  separate(stat_var, into = c("subject", "statistic"), sep = "_(?=[^_]+$)") %>%
+  pivot_wider(names_from = statistic, values_from = value) %>%
+  mutate(across(where(is.numeric), ~round(.x, 2)))
+
+print(cv_comparison)
+
+cat("\nInterpretation of Coefficient of Variation:\n")
+cat("• CV < 15%: Low variability\n")
+cat("• CV 15-35%: Moderate variability  \n")
+cat("• CV > 35%: High variability\n")
+```
+
+## Descriptive Statistics by Groups
+
+```{webr-r}
+# Comprehensive descriptive statistics by year in school
+descriptives_by_year <- student_performance %>%
+  group_by(year_in_school) %>%
+  summarise(
+    n = n(),
+    
+    # Math scores
+    math_mean = mean(math_score),
+    math_sd = sd(math_score),
+    math_median = median(math_score),
+    
+    # Science scores  
+    science_mean = mean(science_score),
+    science_sd = sd(science_score),
+    science_median = median(science_score),
+    
+    # English scores
+    english_mean = mean(english_score),
+    english_sd = sd(english_score), 
+    english_median = median(english_score),
+    
+    # Study habits
+    study_hours_mean = mean(study_hours_week),
+    study_hours_sd = sd(study_hours_week),
+    
+    .groups = 'drop'
+  ) %>%
+  mutate(across(where(is.numeric) & !matches("year|n"), ~round(.x, 2)))
+
+print(descriptives_by_year)
+
+# Create a more detailed summary using psych package
+psych_summary <- student_performance %>%
+  select(math_score, science_score, english_score, study_hours_week) %>%
+  psych::describe() %>%
+  select(n, mean, sd, median, min, max, skew, kurtosis) %>%
+  mutate(across(everything(), ~round(.x, 2)))
+
+cat("\n=== DETAILED PSYCHOMETRIC SUMMARY ===\n")
+print(psych_summary)
+```
+
+## Data Visualization for Descriptive Statistics
+
+### Distribution Plots
+
+```{webr-r}
+# Create comprehensive visualization of score distributions
+score_distributions <- student_performance %>%
+  select(math_score, science_score, english_score) %>%
+  pivot_longer(everything(), names_to = "subject", values_to = "score") %>%
+  mutate(subject = str_replace(subject, "_score", "") %>% str_to_title())
+
+# Histogram with overlaid statistics
+p1 <- score_distributions %>%
+  ggplot(aes(x = score, fill = subject)) +
+  geom_histogram(bins = 20, alpha = 0.7, color = "white") +
+  geom_vline(data = score_distributions %>% 
+               group_by(subject) %>% 
+               summarise(mean_score = mean(score), .groups = 'drop'),
+             aes(xintercept = mean_score), 
+             color = "red", linetype = "dashed", linewidth = 1) +
+  facet_wrap(~subject, ncol = 1, scales = "free_y") +
+  labs(title = "Distribution of Academic Scores",
+       subtitle = "Red dashed line shows mean for each subject",
+       x = "Score", y = "Frequency") +
+  theme(legend.position = "none") +
+  scale_fill_viridis_d()
+
+print(p1)
+```
+
+### Box Plots for Group Comparisons
+
+```{webr-r}
+# Box plots comparing scores by gender
+p2 <- score_distributions %>%
+  left_join(student_performance %>% select(student_id, gender) %>% 
+            mutate(row_id = row_number())) %>%
+  mutate(row_id = rep(1:n_participants, 3)) %>%
+  left_join(student_performance %>% select(student_id, gender) %>% 
+            mutate(row_id = row_number()), by = "row_id") %>%
+  select(-row_id) %>%
+  ggplot(aes(x = subject, y = score, fill = gender)) +
+  geom_boxplot(alpha = 0.8, outlier.alpha = 0.6) +
+  labs(title = "Score Distribution by Subject and Gender",
+       subtitle = "Box plots show median, quartiles, and outliers",
+       x = "Subject", y = "Score", fill = "Gender") +
+  scale_fill_viridis_d() +
+  theme(legend.position = "bottom")
+
+print(p2)
+```
+
+### Correlation Visualization
+
+```{webr-r}
+# Correlation matrix and scatterplot
+# Calculate correlation matrix
+correlation_matrix <- student_performance %>%
+  select(math_score, science_score, english_score, study_hours_week, age) %>%
+  cor() %>%
+  round(3)
+
+print(correlation_matrix)
+
+# Create scatterplot for math vs science scores
+student_performance %>%
+  ggplot(aes(x = math_score, y = science_score)) +
+  geom_point(alpha = 0.6, color = "steelblue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "Correlation: Math vs Science Scores",
+       subtitle = sprintf("r = %.3f", cor(student_performance$math_score, 
+                                         student_performance$science_score)),
+       x = "Math Score", y = "Science Score") +
+  theme_minimal()
+```
+
+## Sampling Distribution Demonstration
+
+```{webr-r}
+# Demonstrate sampling distribution concepts from the sampling exercise
+# Population parameters (true values)
+population_mean <- 75
+population_sd <- 12
+population_size <- 10000
+
+# Create a population
+set.seed(567)
+population <- rnorm(population_size, mean = population_mean, sd = population_sd)
+
+# Take multiple samples of different sizes and calculate means
+n_samples <- 1000
+sample_sizes <- c(5, 20, 50)
+
+sampling_demo <- map_dfr(sample_sizes, function(n) {
+  sample_means <- replicate(n_samples, {
+    sample_data <- sample(population, size = n, replace = TRUE)
+    mean(sample_data)
+  })
+  
+  tibble(
+    sample_size = n,
+    sample_mean = sample_means,
+    theoretical_se = population_sd / sqrt(n),
+    actual_se = sd(sample_means)
+  )
+})
+
+# Calculate summary statistics for sampling distributions
+sampling_summary <- sampling_demo %>%
+  group_by(sample_size) %>%
+  summarise(
+    mean_of_means = mean(sample_mean),
+    sd_of_means = sd(sample_mean),
+    theoretical_se = first(theoretical_se),
+    difference = abs(sd_of_means - theoretical_se),
+    .groups = 'drop'
+  ) %>%
+  mutate(across(where(is.numeric), ~round(.x, 3)))
+
+print(sampling_summary)
+
+# Visualize sampling distributions
+sampling_demo %>%
+  ggplot(aes(x = sample_mean, fill = factor(sample_size))) +
+  geom_histogram(bins = 30, alpha = 0.7, color = "white") +
+  geom_vline(xintercept = population_mean, color = "red", 
+             linetype = "dashed", linewidth = 1) +
+  facet_wrap(~paste("n =", sample_size), scales = "free_y") +
+  labs(title = "Sampling Distribution of the Mean",
+       subtitle = "Red line shows true population mean (75)",
+       x = "Sample Mean", y = "Frequency",
+       caption = "Notice how larger samples have less variability") +
+  theme(legend.position = "none") +
+  scale_fill_viridis_d()
+```
+
+---
+
+# Session 4: Statistical Inference and Hypothesis Testing {#session4}
+
+## Introduction to Statistical Inference
+
+Statistical inference allows us to estimate population characteristics from sample data and test theories about the effects of treatments. Let's explore these concepts using R.
+
+## Probability and the Normal Distribution
+
+```{webr-r}
+# Demonstrate probability concepts using the normal distribution
+# Example: Adult male height with mean = 69 inches, sd = 3 inches
+
+height_mean <- 69
+height_sd <- 3
+
+# Create a range of heights for visualization
+height_range <- seq(60, 78, by = 0.1)
+height_density <- dnorm(height_range, mean = height_mean, sd = height_sd)
+
+# Create visualization of normal distribution
+height_data <- tibble(
+  height = height_range,
+  density = height_density
+)
+
+# Calculate specific probabilities
+prob_66_to_72 <- pnorm(72, height_mean, height_sd) - pnorm(66, height_mean, height_sd)
+prob_above_75 <- 1 - pnorm(75, height_mean, height_sd)
+
+cat("=== PROBABILITY CALCULATIONS ===\n")
+cat(sprintf("Mean height: %d inches\n", height_mean))
+cat(sprintf("Standard deviation: %d inches\n", height_sd))
+cat(sprintf("P(66 < height < 72): %.3f or %.1f%%\n", prob_66_to_72, prob_66_to_72 * 100))
+cat(sprintf("P(height > 75): %.4f or %.2f%%\n", prob_above_75, prob_above_75 * 100))
+
+# Visualize the normal distribution with probability regions
+ggplot(height_data, aes(x = height, y = density)) +
+  geom_line(linewidth = 1.2, color = "darkblue") +
+  # Shade the region between 66 and 72 inches (within 1 SD)
+  geom_area(data = height_data %>% filter(height >= 66 & height <= 72),
+            aes(x = height, y = density), fill = "steelblue", alpha = 0.5) +
+  # Mark the mean
+  geom_vline(xintercept = height_mean, color = "red", linetype = "dashed", linewidth = 1) +
+  # Mark ±1, ±2 standard deviations
+  geom_vline(xintercept = c(66, 72), color = "gray", linetype = "dotted") +
+  geom_vline(xintercept = c(63, 75), color = "gray", linetype = "dotted") +
+  labs(title = "Normal Distribution: Adult Male Height",
+       subtitle = "Shaded area shows P(66 < height < 72) ≈ 68%",
+       x = "Height (inches)", y = "Probability Density") +
+  scale_x_continuous(breaks = seq(60, 78, 3)) +
+  theme_minimal()
+```
+
+## Sampling Error and Standard Error
+
+```{webr-r}
+# Demonstrate sampling error concepts
+set.seed(123)
+
+# Population parameters
+pop_mean <- 75
+pop_sd <- 12
+pop_size <- 10000
+
+# Create a population
+population <- rnorm(pop_size, mean = pop_mean, sd = pop_sd)
+
+# Take samples of different sizes multiple times
+n_simulations <- 1000
+sample_sizes <- c(10, 30, 50, 100)
+
+sampling_error_demo <- map_dfr(sample_sizes, function(n) {
+  sample_means <- replicate(n_simulations, {
+    sample_data <- sample(population, size = n, replace = TRUE)
+    mean(sample_data)
+  })
+  
+  tibble(
+    sample_size = n,
+    sample_mean = sample_means,
+    sampling_error = sample_means - pop_mean,  # Difference from true mean
+    standard_error = pop_sd / sqrt(n)  # Theoretical standard error
+  )
+})
+
+# Calculate statistics about sampling error
+sampling_error_summary <- sampling_error_demo %>%
+  group_by(sample_size) %>%
+  summarise(
+    mean_sampling_error = mean(sampling_error),
+    sd_sampling_error = sd(sampling_error),
+    theoretical_se = first(standard_error),
+    rmse = sqrt(mean(sampling_error^2)),  # Root mean squared error
+    .groups = 'drop'
+  ) %>%
+  mutate(across(where(is.numeric), ~round(.x, 3)))
+
+print(sampling_error_summary)
+
+# Visualize sampling error
+sampling_error_demo %>%
+  ggplot(aes(x = sampling_error, fill = factor(sample_size))) +
+  geom_histogram(bins = 30, alpha = 0.7, color = "white") +
+  geom_vline(xintercept = 0, color = "red", linetype = "dashed", linewidth = 1) +
+  facet_wrap(~paste("n =", sample_size), scales = "free_y") +
+  labs(title = "Distribution of Sampling Error",
+       subtitle = "Sampling error = Sample mean - Population mean",
+       x = "Sampling Error", y = "Frequency",
+       caption = "Red line shows zero error (perfect estimate)") +
+  theme(legend.position = "none") +
+  scale_fill_viridis_d()
+```
+
+## Confidence Intervals
+
+```{webr-r}
+# Demonstrate confidence interval concepts
+set.seed(456)
+
+# Simulate taking a single sample
+sample_size <- 30
+sample_data <- rnorm(sample_size, mean = 75, sd = 12)
+sample_mean <- mean(sample_data)
+sample_sd <- sd(sample_data)
+standard_error <- sample_sd / sqrt(sample_size)
+
+# Calculate confidence intervals
+confidence_levels <- c(0.90, 0.95, 0.99)
+z_scores <- c(1.645, 1.96, 2.576)
+
+ci_results <- tibble(
+  confidence_level = confidence_levels,
+  z_score = z_scores,
+  margin_error = z_scores * standard_error,
+  ci_lower = sample_mean - margin_error,
+  ci_upper = sample_mean + margin_error,
+  ci_width = ci_upper - ci_lower
+) %>%
+  mutate(across(where(is.numeric) & !matches("confidence|z_score"), ~round(.x, 2)))
+
+cat("=== CONFIDENCE INTERVAL CALCULATIONS ===\n")
+cat(sprintf("Sample mean: %.2f\n", sample_mean))
+cat(sprintf("Sample standard deviation: %.2f\n", sample_sd))
+cat(sprintf("Standard error: %.2f\n", standard_error))
+cat(sprintf("Sample size: %d\n", sample_size))
+print(ci_results)
+
+# Demonstrate what "95% confidence" means through simulation
+n_samples <- 1000
+ci_simulation <- replicate(n_samples, {
+  sample_data <- rnorm(30, mean = 75, sd = 12)  # True mean = 75
+  sample_mean <- mean(sample_data)
+  se <- sd(sample_data) / sqrt(30)
+  
+  ci_lower <- sample_mean - 1.96 * se
+  ci_upper <- sample_mean + 1.96 * se
+  
+  # Check if CI contains true mean
+  contains_true_mean <- (ci_lower <= 75) & (ci_upper >= 75)
+  
+  tibble(
+    ci_lower = ci_lower,
+    ci_upper = ci_upper,
+    contains_true_mean = contains_true_mean
+  )
+}, simplify = FALSE) %>%
+  bind_rows(.id = "sample_id") %>%
+  mutate(sample_id = as.numeric(sample_id))
+
+# Calculate coverage probability
+coverage_rate <- mean(ci_simulation$contains_true_mean)
+cat(sprintf("\n95%% Confidence Interval Coverage Rate: %.1f%%\n", coverage_rate * 100))
+cat("(Should be approximately 95% if theory is correct)\n")
+
+# Visualize first 50 confidence intervals
+ci_simulation %>%
+  slice_head(n = 50) %>%
+  mutate(
+    color_group = ifelse(contains_true_mean, "Contains True Mean", "Misses True Mean")
+  ) %>%
+  ggplot(aes(y = sample_id)) +
+  geom_segment(aes(x = ci_lower, xend = ci_upper, color = color_group), linewidth = 1) +
+  geom_vline(xintercept = 75, color = "red", linetype = "dashed", linewidth = 1.5) +
+  labs(title = "95% Confidence Intervals for Sample Means",
+       subtitle = "Red line shows true population mean (75)",
+       x = "Value", y = "Sample Number", color = "Interval Status") +
+  scale_color_manual(values = c("Contains True Mean" = "steelblue", 
+                               "Misses True Mean" = "orange")) +
+  theme(legend.position = "bottom")
+```
+
+## Hypothesis Testing Framework
+
+```{webr-r}
+# Set up hypothesis testing framework
+cat("=== HYPOTHESIS TESTING FRAMEWORK ===\n\n")
+
+cat("1. NULL HYPOTHESIS (H₀):\n")
+cat("   • States 'no effect' or 'no difference'\n")
+cat("   • What we assume to be true until proven otherwise\n")
+cat("   • Example: H₀: μ = 75 (population mean equals 75)\n\n")
+
+cat("2. ALTERNATIVE HYPOTHESIS (H₁):\n")
+cat("   • States there is an effect or difference\n")
+cat("   • What we want to provide evidence for\n")
+cat("   • Example: H₁: μ ≠ 75 (population mean does not equal 75)\n\n")
+
+cat("3. SIGNIFICANCE LEVEL (α):\n")
+cat("   • Probability of Type I error (rejecting true H₀)\n")
+cat("   • Commonly set to 0.05 (5%)\n")
+cat("   • Our cutoff for 'statistical significance'\n\n")
+
+# Demonstrate Type I and Type II errors
+error_demo <- tibble(
+  decision = c("Reject H₀", "Do not reject H₀"),
+  h0_true = c("Type I Error (α)", "Correct Decision"),
+  h0_false = c("Correct Decision", "Type II Error (β)")
+)
+
+cat("4. POSSIBLE OUTCOMES:\n")
+print(error_demo, n = Inf)
+
+cat("\n5. STATISTICAL POWER:\n")
+cat("   • Power = 1 - β (probability of detecting true effect)\n")
+cat("   • Typically want power ≥ 0.80 (80%)\n")
+```
+
+## One-Sample t-Test
+
+```{webr-r}
+# Perform one-sample t-test using our student data
+set.seed(789)
+
+# Research question: Are math scores significantly different from 75?
+test_value <- 75
+math_scores <- student_performance$math_score
+
+# Descriptive statistics
+descriptive_stats <- tibble(
+  n = length(math_scores),
+  mean = mean(math_scores),
+  sd = sd(math_scores),
+  se = sd / sqrt(n),
+  ci_95_lower = mean - 1.96 * se,
+  ci_95_upper = mean + 1.96 * se
+) %>%
+  mutate(across(where(is.numeric), ~round(.x, 3)))
+
+cat("=== ONE-SAMPLE T-TEST ===\n")
+cat("Research Question: Are math scores significantly different from 75?\n\n")
+
+cat("Descriptive Statistics:\n")
+print(descriptive_stats)
+
+# Perform the t-test
+t_test_result <- t.test(math_scores, mu = test_value)
+print(t_test_result)
+
+# Calculate effect size (Cohen's d)
+cohens_d <- (mean(math_scores) - test_value) / sd(math_scores)
+cat(sprintf("\nEffect Size (Cohen's d): %.3f\n", cohens_d))
+
+# Interpret effect size
+effect_interpretation <- case_when(
+  abs(cohens_d) < 0.2 ~ "negligible",
+  abs(cohens_d) < 0.5 ~ "small", 
+  abs(cohens_d) < 0.8 ~ "medium",
+  TRUE ~ "large"
+)
+cat(sprintf("Effect size interpretation: %s\n", effect_interpretation))
+
+# Visualize the test
+ggplot(tibble(x = math_scores), aes(x = x)) +
+  geom_histogram(bins = 20, fill = "steelblue", alpha = 0.7, color = "white") +
+  geom_vline(xintercept = mean(math_scores), color = "red", 
+             linetype = "dashed", linewidth = 1.2) +
+  geom_vline(xintercept = test_value, color = "orange", 
+             linetype = "solid", linewidth = 1.2) +
+  labs(title = "One-Sample t-Test: Math Scores vs. 75",
+       subtitle = "Red dashed = sample mean, Orange solid = test value",
+       x = "Math Score", y = "Frequency") +
+  annotate("text", x = mean(math_scores) + 2, y = 12, 
+           label = sprintf("Sample Mean\n%.1f", mean(math_scores)), 
+           color = "red") +
+  annotate("text", x = test_value - 2, y = 12, 
+           label = sprintf("Test Value\n%d", test_value), 
+           color = "orange")
+```
+
+## Independent Samples t-Test
+
+```{webr-r}
+# Independent samples t-test: Compare math scores by gender
+# Filter to Male vs Female for cleaner comparison
+gender_comparison_data <- student_performance %>%
+  filter(gender %in% c("Male", "Female"))
+
+# Descriptive statistics by gender
+gender_descriptives <- gender_comparison_data %>%
+  group_by(gender) %>%
+  summarise(
+    n = n(),
+    mean = mean(math_score),
+    sd = sd(math_score),
+    se = sd / sqrt(n),
+    .groups = 'drop'
+  ) %>%
+  mutate(across(where(is.numeric), ~round(.x, 3)))
+
+cat("=== INDEPENDENT SAMPLES T-TEST ===\n")
+cat("Research Question: Do math scores differ between males and females?\n\n")
+
+print(gender_descriptives)
+
+# Test for equal variances (Levene's test approximation)
+variance_test <- var.test(math_score ~ gender, data = gender_comparison_data)
+cat(sprintf("\nVariance test (F-test) p-value: %.4f\n", variance_test$p.value))
+
+# Perform independent samples t-test
+independent_t_test <- t.test(math_score ~ gender, 
+                           data = gender_comparison_data, 
+                           var.equal = TRUE)
+print(independent_t_test)
+
+# Calculate effect size (Cohen's d for independent samples)
+male_scores <- gender_comparison_data %>% filter(gender == "Male") %>% pull(math_score)
+female_scores <- gender_comparison_data %>% filter(gender == "Female") %>% pull(math_score)
+
+# Pooled standard deviation
+pooled_sd <- sqrt(((length(male_scores) - 1) * var(male_scores) + 
+                   (length(female_scores) - 1) * var(female_scores)) / 
+                  (length(male_scores) + length(female_scores) - 2))
+
+cohens_d_independent <- abs(mean(male_scores) - mean(female_scores)) / pooled_sd
+cat(sprintf("\nCohen's d (effect size): %.3f\n", cohens_d_independent))
+
+# Visualize group comparison
+gender_comparison_data %>%
+  ggplot(aes(x = gender, y = math_score, fill = gender)) +
+  geom_boxplot(alpha = 0.7, outlier.alpha = 0.6) +
+  geom_jitter(width = 0.2, alpha = 0.5) +
+  stat_summary(fun = mean, geom = "point", color = "red", size = 3) +
+  labs(title = "Independent Samples t-Test: Math Scores by Gender",
+       subtitle = "Red dots show group means",
+       x = "Gender", y = "Math Score") +
+  scale_fill_viridis_d() +
+  theme(legend.position = "none")
+```
+
+## Paired Samples t-Test
+
+```{webr-r}
+# Paired samples t-test: Compare math vs science scores (within subjects)
+paired_data <- student_performance %>%
+  select(student_id, math_score, science_score)
+
+# Descriptive statistics for paired variables
+paired_descriptives <- paired_data %>%
+  summarise(
+    math_mean = mean(math_score),
+    math_sd = sd(math_score),
+    science_mean = mean(science_score),
+    science_sd = sd(science_score),
+    correlation = cor(math_score, science_score),
+    difference_mean = mean(math_score - science_score),
+    difference_sd = sd(math_score - science_score),
+    n = n()
+  ) %>%
+  mutate(across(where(is.numeric), ~round(.x, 3)))
+
+cat("=== PAIRED SAMPLES T-TEST ===\n")
+cat("Research Question: Do students score differently in math vs science?\n\n")
+
+print(paired_descriptives)
+
+# Perform paired samples t-test
+paired_t_test <- t.test(paired_data$math_score, paired_data$science_score, paired = TRUE)
+print(paired_t_test)
+
+# Effect size for paired samples
+cohens_d_paired <- mean(paired_data$math_score - paired_data$science_score) / 
+                   sd(paired_data$math_score - paired_data$science_score)
+cat(sprintf("\nCohen's d (effect size): %.3f\n", abs(cohens_d_paired)))
+
+# Visualize paired comparison
+paired_plot_data <- paired_data %>%
+  pivot_longer(cols = c(math_score, science_score), 
+               names_to = "subject", values_to = "score") %>%
+  mutate(subject = str_replace(subject, "_score", "") %>% str_to_title())
+
+ggplot(paired_plot_data, aes(x = subject, y = score, group = student_id)) +
+  geom_line(alpha = 0.3, color = "gray") +
+  geom_point(alpha = 0.5, size = 1) +
+  stat_summary(aes(group = 1), fun = mean, geom = "point", 
+               color = "red", size = 4) +
+  stat_summary(aes(group = 1), fun = mean, geom = "line", 
+               color = "red", linewidth = 1.5, group = 1) +
+  labs(title = "Paired Samples t-Test: Math vs Science Scores",
+       subtitle = "Gray lines connect individual students, red shows means",
+       x = "Subject", y = "Score") +
+  theme_minimal()
+```
+
+## Power Analysis
+
+```{webr-r}
+# Demonstrate power analysis using pwr package
+library(pwr)
+
+cat("=== POWER ANALYSIS ===\n\n")
+
+cat("Statistical Power Components:\n")
+cat("• Effect Size (d): Magnitude of difference (Cohen's d)\n")
+cat("• Alpha (α): Type I error rate (usually 0.05)\n") 
+cat("• Power (1-β): Probability of detecting true effect\n")
+cat("• Sample Size (n): Number of observations\n\n")
+
+# Sample size calculation for different effect sizes
+effect_sizes <- c(0.2, 0.5, 0.8)
+effect_labels <- c("Small", "Medium", "Large")
+
+power_analysis_results <- map_dfr(1:length(effect_sizes), function(i) {
+  result <- pwr.t.test(d = effect_sizes[i], sig.level = 0.05, 
+                      power = 0.80, type = "two.sample")
+  tibble(
+    effect_size = effect_sizes[i],
+    effect_label = effect_labels[i],
+    sample_size_per_group = ceiling(result$n),
+    total_sample_size = ceiling(result$n) * 2
+  )
+})
+
+cat("Sample size needed for 80% power (α = 0.05, two-sample t-test):\n")
+print(power_analysis_results)
+
+# Power curve visualization
+sample_sizes <- seq(10, 100, by = 5)
+power_values <- map_dbl(sample_sizes, function(n) {
+  result <- pwr.t.test(n = n, d = 0.5, sig.level = 0.05, type = "two.sample")
+  result$power
+})
+
+power_curve_data <- tibble(
+  sample_size = sample_sizes,
+  power = power_values
+)
+
+# Find sample size for 80% power
+target_power <- 0.80
+required_n <- ceiling(pwr.t.test(d = 0.5, sig.level = 0.05, 
+                                power = target_power, type = "two.sample")$n)
+
+ggplot(power_curve_data, aes(x = sample_size, y = power)) +
+  geom_line(color = "steelblue", linewidth = 1.2) +
+  geom_hline(yintercept = target_power, color = "red", 
+             linetype = "dashed", linewidth = 1) +
+  geom_vline(xintercept = required_n, color = "red", 
+             linetype = "dashed", linewidth = 1) +
+  geom_point(aes(x = required_n, y = target_power), 
+             color = "red", size = 3) +
+  labs(title = "Power Curve for Two-Sample t-Test",
+       subtitle = sprintf("Medium effect size (d = 0.5), α = 0.05, n = %d for 80%% power", 
+                         required_n),
+       x = "Sample Size (per group)", y = "Statistical Power") +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
+  annotate("text", x = required_n + 10, y = target_power - 0.1, 
+           label = sprintf("80%% power at\nn = %d", required_n), color = "red")
+```
+
+## Summary of Tests
+
+```{webr-r}
+# Create summary table of all statistical tests performed
+test_summary <- tibble(
+  test_type = c("One-Sample t-Test", "Independent Samples t-Test", "Paired Samples t-Test"),
+  comparison = c("Math scores vs. 75", "Math: Male vs. Female", "Math vs. Science scores"),
+  t_statistic = c(
+    round(t_test_result$statistic, 3),
+    round(independent_t_test$statistic, 3), 
+    round(paired_t_test$statistic, 3)
+  ),
+  df = c(
+    round(t_test_result$parameter, 0),
+    round(independent_t_test$parameter, 0),
+    round(paired_t_test$parameter, 0)
+  ),
+  p_value = c(
+    round(t_test_result$p.value, 4),
+    round(independent_t_test$p.value, 4),
+    round(paired_t_test$p.value, 4)
+  ),
+  cohens_d = c(
+    round(abs(cohens_d), 3),
+    round(cohens_d_independent, 3),
+    round(abs(cohens_d_paired), 3)
+  ),
+  significance = ifelse(c(t_test_result$p.value, independent_t_test$p.value, 
+                         paired_t_test$p.value) < 0.05, "Significant", "Not Significant")
+)
+
+cat("=== SUMMARY OF STATISTICAL TESTS ===\n")
+print(test_summary)
+
+cat("\nInterpretation Guidelines:\n")
+cat("• p < 0.05: Statistically significant (reject H₀)\n")
+cat("• Cohen's d < 0.2: Small effect, 0.2-0.8: Medium effect, > 0.8: Large effect\n")
+cat("• t-statistic: Larger absolute values indicate stronger evidence against H₀\n")
+```
+
+---
+
+*This companion continues to evolve. For updates and additional resources, check the course website.*
