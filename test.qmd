@@ -102,6 +102,11 @@ All code blocks in this companion are interactive! You can modify and run them d
 
 In statistics, understanding the type of data you're working with is crucial for choosing appropriate analytical methods. Let's explore the different types of variables using R and visualizations.
 
+```{webr-r}
+diet_data <- read_csv("https://raw.githubusercontent.com/dkangsim-ehg/practical_statistics_companion_2025_ek/main/diet45ex.csv")
+
+head(diet_data)
+```
 ---
 
 *This companion continues to evolve. For updates and additional resources, check the course website.*
