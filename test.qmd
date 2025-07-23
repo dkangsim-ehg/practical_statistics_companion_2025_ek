@@ -1,0 +1,107 @@
+---
+title: "2025 Practical Statistics for Medical Research"
+subtitle: "Interactive R Companion for SPSS Users"
+author: "Jan Hughes-Austin and D. Eastern Kang Sim"
+date: "`r Sys.Date()`"
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-location: left
+    toc-expand: 2
+    toc-title: "Sessions"
+    code-fold: false
+    code-tools: true
+    embed-resources: true
+filters:
+  - webr
+webr:
+  packages: ['tidyverse', 
+  'DT', 'knitr', 
+  'kableExtra', 'psych', 
+  'pwr', 'ggplot2', 'dplyr', 'corrr']
+---
+
+<style>
+.sidebar-nav {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.comparison-box {
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  padding: 15px;
+  margin: 10px 0;
+  background-color: #f8f9fa;
+}
+
+.spss-output {
+  background-color: #fff3cd;
+  border-left: 4px solid #856404;
+}
+
+.r-output {
+  background-color: #d4edda;
+  border-left: 4px solid #155724;
+}
+</style>
+
+## Welcome to Your R Companion
+
+### Important Note: This is a Learning Companion, Not a Replacement
+
+::: {.callout-important}
+## Companion, Not Substitute
+This interactive guide serves as a **learning companion** to your SPSS-based statistics course, not a replacement. While your primary instruction uses SPSS, this resource helps you explore how the same statistical concepts and analyses can be implemented in R. 
+:::
+
+### Why Learn R for Statistics?
+
+`R` is a free and open-source programming language specifically designed for statistical computing and data analysis. Unlike proprietary software, R offers several key advantages for scientific research:
+
+**Reproducibility**: R scripts document every step of your analysis, making your research completely reproducible. Anyone can see exactly what you did and replicate your results.
+
+**Flexibility**: With thousands of packages (libraries) available, R can handle virtually any statistical method or data visualization need.
+
+### Introduction to the Tidyverse
+
+The `tidyverse` is "a collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures." This collection of packages makes data analysis more intuitive and efficient.
+
+**Core Philosophy**: Tidy datasets are easier to manipulate, model, and visualize because the tidy data principles impose a general framework and a consistent set of rules on data.
+
+**The Pipe Operator (`%>%`)**: One of the most powerful features of tidyverse is the pipe operator, which allows you to chain operations together in a readable way:
+
+```r
+# Instead of nested functions (hard to read)
+result <- function3(function2(function1(data, arg1), arg2), arg3)
+
+# Use pipes (reads left to right, top to bottom)
+result <- data %>%
+  function1(arg1) %>%
+  function2(arg2) %>%
+  function3(arg3)
+```
+
+This approach makes your code more readable and mirrors how you think about data analysis: "take the data, then do this, then do that."
+
+### Getting Started
+
+::: {.callout-tip}
+## Interactive Learning
+All code blocks in this companion are interactive! You can modify and run them directly in your browser. This hands-on approach helps you learn by doing, which is essential for mastering both statistical concepts and R programming.
+:::
+
+---
+
+# Session 1: Concepts of Measurement {#session1}
+
+## Understanding Variables and Measurement Scales
+
+In statistics, understanding the type of data you're working with is crucial for choosing appropriate analytical methods. Let's explore the different types of variables using R and visualizations.
+
+---
+
+*This companion continues to evolve. For updates and additional resources, check the course website.*
