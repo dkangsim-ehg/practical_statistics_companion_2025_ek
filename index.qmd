@@ -11,7 +11,7 @@ This guide serves as a **learning companion** to your SPSS-based statistics cour
 
 ## Why Learn R for Medical Research?
 
-**Reproducibility**: R scripts document every step of your analysis, making your research completely reproducible.
+**Reproducibility**: R scripts document every step of your analysis, making your research completely reproducible. 
 
 **Flexibility**: With thousands of packages available, R can handle virtually any statistical method needed for your research. 
 
@@ -31,7 +31,9 @@ While this companion runs R directly in your browser, you may want to set up R o
 
 **Documentation**: Use R Markdown (.Rmd) files to integrate code, results, and narrative of your thinking process. 
 
-**Package Management**: Install packages once (_install.packages()_), load them each session (_library()_). This page will mainly use the `tidyverse` collection for easy data analysis workflows. 
+**Package Management**: Install packages once (**install.packages()**), load them each session (**library()**). This page will mainly use the `tidyverse` collection for easy data analysis workflows. 
+
+Let's test that `webR` is working. Give it a try! Press the green play button and see your output. You can also make edits. 
 
 ```{webr-r}
 # Test that webR is working
