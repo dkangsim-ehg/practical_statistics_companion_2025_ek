@@ -3,7 +3,7 @@
 ```{webr-r}
 # load data
 library(haven)
-diet_data<- read_sav("https://github.com/dkangsim-ehg/practical_statistics_companion_2025_ek/blob/main/Diet45Ex.sav")
+diet_data<- read_sav("https://raw.githubusercontent.com/dkangsim-ehg/practical_statistics_companion_2025_ek/main/Diet45Ex.sav")
 ```
 
 ## Understanding Variables and Measurement Scales
