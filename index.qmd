@@ -66,6 +66,7 @@ All code blocks are interactive! You can modify and run them directly in your br
 ## Technical Setup
 
 This companion uses:
+
 - **webR**: R running directly in your browser
 - **tidyverse**: Modern R packages for data analysis
 - **Datasets**: Same datasets used in the class
