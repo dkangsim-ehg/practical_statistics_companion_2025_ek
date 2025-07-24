@@ -1,9 +1,8 @@
 # Session 1: Concepts of Measurement {#sec-measurement}
 
 ```{webr-r}
-#| context: setup
-#| echo: false
-
+# load data
+library(haven)
 diet_data<- read_csv("https://raw.githubusercontent.com/dkangsim-ehg/practical_statistics_companion_2025_ek/main/diet45ex.csv")
 ```
 
@@ -15,8 +14,6 @@ In biostatistics and medical research, understanding the type of data you're wor
 
 ```{webr-r}
 # Display our medical research dataset
-diet_data<- read_csv("https://github.com/dkangsim-ehg/practical_statistics_companion_2025_ek/blob/main/diet45ex.csv")
-
 cat("Sample Medical Research Dataset:\n")
 print(head(diet_data, 8))
 ```
