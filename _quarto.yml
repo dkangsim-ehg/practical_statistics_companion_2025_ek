@@ -1,22 +1,13 @@
 project:
   type: website
   output-dir: docs
-  preview:
-    port: 4200
-    browser: true
-  render:
-    - "*.qmd"
 
-# Language and locale
 lang: en-US
 
-# Website configuration
 website:
   title: "Interactive R Companion for SPSS Users"
   
   navbar:
-    background: primary
-    search: true
     left:
       - href: index.qmd
         text: "Home"
@@ -24,128 +15,32 @@ website:
         text: "Session 1: Measurement"  
       - href: session3.qmd
         text: "Session 3: Descriptive Statistics"
-    right:
-      - icon: github
-        href: https://github.com/dkangsim-ehg/practical_statistics_companion_2025_ek
-        aria-label: GitHub
-    
-  sidebar:
-    style: "docked"
-    search: true
-    contents:
-      - text: "Getting Started"
-        href: index.qmd
-      - section: "Sessions"
-        contents:
-          - text: "Session 1: Measurement Concepts"
-            href: session1.qmd
-          - text: "Session 3: Descriptive Statistics" 
-            href: session3.qmd
     
   page-footer:
-    left: |
-      Interactive R Companion for SPSS Users - Medical Research Statistics
-    center: |
-      Built with [Quarto](https://quarto.org/) and [webR](https://docs.r-wasm.org/webr/)
-    right: |
-      © 2025 Jan Hughes-Austin & D. Eastern Kang Sim
+    left: "Interactive R Companion for SPSS Users"
+    right: "Built with Quarto and webR"
 
-# Global HTML format settings
 format:
   html:
-    theme:
-      light: [cosmo, custom.scss]
-      dark: [slate, custom.scss]
-    
-    # Layout and navigation
+    theme: cosmo
     toc: true
     toc-location: left
-    toc-expand: 2
-    toc-title: "Contents"
-    toc-depth: 3
-    
-    # Code settings
     code-fold: false
-    code-tools: 
-      source: true
-      toggle: true
-      caption: "Show code"
-    code-overflow: wrap
-    code-link: true
-    code-line-numbers: false
-    
-    # Content settings
-    embed-resources: false
-    standalone: false
-    
-    # Styling
+    code-tools: true
     css: styles.css
-    callout-appearance: simple
-    callout-icon: true
-    
-    # Tables and figures
-    tbl-cap-location: bottom
-    fig-cap-location: bottom
-    fig-width: 8
-    fig-height: 6
-    fig-dpi: 300
-    
-    # Links and references
-    link-external-icon: true
-    link-external-newwindow: true
 
-# WebR Configuration - KEY PERFORMANCE OPTIMIZATION
 filters:
   - webr
 
 webr:
-  # Essential packages only for speed
   packages: 
     - "dplyr"
     - "tidyr" 
     - "ggplot2"
     - "stringr"
-  
-  # Performance optimizations
   autoload-packages: true
-  show-startup-message: true
-  show-header-message: true
-  
-  # Channel and repository config
-  channel-type: "automatic"
 
-# Global code execution settings
 execute:
   echo: false
   warning: false
   message: false
-  error: false
-  cache: false
-  freeze: false
-
-# Global knitr settings  
-knitr:
-  opts_chunk:
-    message: false
-    warning: false
-    collapse: true
-    comment: "#>"
-    fig.align: "center"
-    fig.width: 8
-    fig.height: 6
-    dpi: 300
-    out.width: "100%"
-
-# Editor preferences
-editor:
-  source: true
-  markdown:
-    wrap: sentence
-    canonical: true
-
-# Cross-references
-crossref:
-  fig-title: "Figure"
-  tbl-title: "Table"
-  fig-prefix: "Fig."
-  tbl-prefix: "Tbl."
