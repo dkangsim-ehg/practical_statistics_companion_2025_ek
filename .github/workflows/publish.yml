@@ -20,6 +20,10 @@ jobs:
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
         
+      - name: Install WebR Extension
+        run: |
+          quarto add coatless/quarto-webr --no-prompt
+        
       - name: Render Quarto Website
         run: quarto render
         
