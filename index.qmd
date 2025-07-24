@@ -13,25 +13,25 @@ This guide serves as a **learning companion** to your SPSS-based statistics cour
 
 **Reproducibility**: R scripts document every step of your analysis, making your research completely reproducible.
 
-**Flexibility**: With thousands of packages available, R can handle virtually any statistical method needed in medical research.
+**Flexibility**: With thousands of packages available, R can handle virtually any statistical method needed for your research. 
 
 **Open Source**: R is free and widely used in academic and clinical research settings.
 
-## Course Structure
+## Getting Started with R
 
-### [Session 1: Concepts of Measurement](session1.qmd)
-- Understanding different types of variables
-- Measurement scales (nominal, ordinal, interval, ratio)
-- Data quality issues in medical research
-- Practical examples with patient data
+### Essential Setup
 
-### [Session 3: Descriptive Statistics](session3.qmd)
-- Measures of central tendency (mean, median, mode)
-- Measures of variability (standard deviation, variance)
-- Data visualization techniques
-- Group comparisons and correlation analysis
+While this companion runs R directly in your browser, you may want to set up R on your computer for analysis projects: 
 
-## Getting Started
+1. **Base R**: Download from [r-project.org](https://www.r-project.org/)
+2. **RStudio**: Free desktop application from [rstudio.com](https://www.rstudio.com/products/RStudio/)
+
+
+### Best Practices
+
+**Documentation**: Use R Markdown (.Rmd) files to integrate code, results, and narrative of your thinking process. 
+
+**Package Management**: Install packages once (`install.packages()'), load them each session (library()). This page will mainly use the `tidyverse` collection for easy data analysis workflows. 
 
 ```{webr-r}
 # Test that webR is working
@@ -58,16 +58,22 @@ All code blocks are interactive! You can modify and run them directly in your br
 ### What Makes This Different?
 
 - **Browser-based**: No software installation required
-- **Medical examples**: All examples use realistic medical/clinical data
-- **SPSS comparison**: Concepts explained in terms familiar to SPSS users
-- **Progressive learning**: Build skills step-by-step
+- **SPSS comparison**: Same datasets used for comparisons
 - **Immediate feedback**: See results instantly as you learn
 
 ## Technical Setup
 
 This companion uses:
 - **webR**: R running directly in your browser
-- **Tidyverse**: Modern R packages for data analysis
-- **Interactive examples**: Modify and run code immediately
+- **tidyverse**: Modern R packages for data analysis
+- **Datasets**: Same datasets used in the class
 
-Ready to begin? Choose a session from the navigation menu above!
+::: {.callout-note}
+## Resources for more? 
+1. **Data Carpentry**: [R for Social Scientsit](https://datacarpentry.github.io/r-socialsci/00-intro.html)
+:::
+
+Ready to begin? **Choose a session from the navigation menu above!**
+
+
+
