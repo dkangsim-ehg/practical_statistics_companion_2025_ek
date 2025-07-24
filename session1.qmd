@@ -1,0 +1,112 @@
+# Session 1: Concepts of Measurement {#sec-measurement}
+
+```{webr-r}
+#| context: setup
+#| echo: false
+
+# Data setup - packages already loaded globally
+set.seed(42)
+
+# Create sample medical research dataset
+n_patients <- 200
+measurement_demo <- tibble(
+  patient_id = 1:n_patients,
+  gender = sample(c("Male", "Female"), n_patients, replace = TRUE, prob = c(0.45, 0.55)),
+  treatment_group = sample(c("Control", "Treatment A", "Treatment B"), n_patients, replace = TRUE),
+  pain_rating = sample(1:10, n_patients, replace = TRUE),
+  age_years = sample(18:85, n_patients, replace = TRUE),
+  weight_kg = round(rnorm(n_patients, mean = 70, sd = 15), 1),
+  blood_pressure = round(rnorm(n_patients, mean = 120, sd = 20), 0)
+) %>%
+  mutate(
+    weight_kg = pmax(40, pmin(150, weight_kg)),
+    blood_pressure = pmax(80, pmin(180, blood_pressure))
+  )
+
+cat("Data loaded successfully!")
+```
+
+## Understanding Variables and Measurement Scales
+
+In biostatistics and medical research, understanding the type of data you're working with is crucial for choosing appropriate analytical methods.
+
+### Types of Variables in Medical Research
+
+```{webr-r}
+# Display our medical research dataset
+cat("Sample Medical Research Dataset:\n")
+print(head(measurement_demo, 8))
+
+cat("\nVariable Classification:\n")
+cat("• patient_id: Identifier (nominal)\n")
+cat("• gender: Nominal variable\n")
+cat("• treatment_group: Nominal variable\n")
+cat("• pain_rating: Ordinal variable (1-10 scale)\n")
+cat("• age_years: Ratio variable (continuous)\n")
+cat("• weight_kg: Ratio variable (continuous)\n")
+cat("• blood_pressure: Ratio variable (continuous)\n")
+```
+
+### Visualizing Variable Types
+
+```{webr-r}
+# Nominal variable: Treatment group distribution
+treatment_plot <- measurement_demo %>%
+  count(treatment_group) %>%
+  ggplot(aes(x = treatment_group, y = n, fill = treatment_group)) +
+  geom_col(alpha = 0.8) +
+  labs(title = "Treatment Group Distribution (Nominal Variable)",
+       x = "Treatment Group", y = "Count") +
+  scale_fill_viridis_d() +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+print(treatment_plot)
+```
+
+```{webr-r}
+# Ordinal variable: Pain rating
+pain_plot <- measurement_demo %>%
+  count(pain_rating) %>%
+  ggplot(aes(x = factor(pain_rating), y = n, fill = factor(pain_rating))) +
+  geom_col(alpha = 0.8) +
+  labs(title = "Pain Rating Distribution (Ordinal Variable)",
+       subtitle = "1 = No pain, 10 = Severe pain",
+       x = "Pain Rating", y = "Count") +
+  scale_fill_viridis_d() +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+print(pain_plot)
+```
+
+```{webr-r}
+# Continuous variable: Weight distribution
+weight_plot <- measurement_demo %>%
+  ggplot(aes(x = weight_kg)) +
+  geom_histogram(bins = 20, fill = "steelblue", alpha = 0.8, color = "white") +
+  geom_vline(aes(xintercept = mean(weight_kg)), 
+             color = "red", linetype = "dashed", linewidth = 1) +
+  labs(title = "Weight Distribution (Continuous Variable)",
+       x = "Weight (kg)", y = "Frequency") +
+  theme_minimal()
+
+print(weight_plot)
+```
+
+## Summary Statistics by Group
+
+```{webr-r}
+# Basic descriptive statistics by treatment group
+treatment_summary <- measurement_demo %>%
+  group_by(treatment_group) %>%
+  summarise(
+    n = n(),
+    mean_age = round(mean(age_years), 1),
+    mean_weight = round(mean(weight_kg), 1),
+    mean_pain = round(mean(pain_rating), 1),
+    .groups = 'drop'
+  )
+
+print(treatment_summary)
+```
