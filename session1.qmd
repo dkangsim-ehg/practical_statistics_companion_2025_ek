@@ -11,7 +11,6 @@ Before diving into measurement concepts, let's introduce three key packages.
 **gtsummary**: grammar of tables for creating statistical summaries (aka table1)
 
 ```{webr-r}
-#| results: 'asis'
 #| warning: false
 #| message: false
 
