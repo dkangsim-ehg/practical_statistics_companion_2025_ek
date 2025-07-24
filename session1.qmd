@@ -1,83 +1,389 @@
 # Session 1: Concepts of Measurement {#sec-measurement}
 
+## Essential R packages
+
+Before diving into measurement concepts, let's introduce three key packages. 
+
+**haven**: imports data from SPSS, SAS, and Stata files (e.g., read_sav(), read_dta(), etc)
+
+**ggplot2**: grammar of graphics for creating visualizations
+
+**gtsummary**: grammar of tables for creating statistical summaries (aka table1)
+
 ```{webr-r}
-# load data
+# load packages first
 library(haven)
+
+# load the diet and exercise data using haven::read_sav()
 diet_data<- read_sav("https://raw.githubusercontent.com/dkangsim-ehg/practical_statistics_companion_2025_ek/main/Diet45Ex.sav")
+
+#quick look at the data
+print(head(diet_data,8)) # show first 8 rows.
 ```
 
-## Understanding Variables and Measurement Scales
+## The Pipe Operator (%>%): Making Code Readable
 
-In biostatistics and medical research, understanding the type of data you're working with is crucial for choosing appropriate analytical methods.
-
-### Types of Variables in Medical Research
+The pipe operator `%>%` is essential for readable data analysis. It passes the result of one function to the next, like an assembly line:
 
 ```{webr-r}
-# Display our medical research dataset
-cat("Sample Medical Research Dataset:\n")
-print(head(diet_data, 8))
+# Without pipes (hard to read):
+# summary_result <- summarise(group_by(diet_data, EXERCISE), mean_kcal = mean(KCAL3, na.rm = TRUE))
+
+# With pipes (easy to read):
+diet_data %>%
+  group_by(EXERCISE) %>%
+  summarise(mean_kcal = round(mean(KCAL3, na.rm = TRUE), 0), .groups = "drop")
 ```
 
-### Visualizing Variable Types
+**Clinical Insight**: The pipe `%>%` makes code read like instructions: "Take the data, THEN group by exercise, THEN calculate mean calories."
+
+## Practice Question 1: Variable Classification
+
+Let's examine each variable in our diet dataset and classify them according to measurement scales:
 
 ```{webr-r}
-# Nominal variable: Treatment group distribution
-treatment_plot <- measurement_demo %>%
-  count(treatment_group) %>%
-  ggplot(aes(x = treatment_group, y = n, fill = treatment_group)) +
-  geom_col(alpha = 0.8) +
-  labs(title = "Treatment Group Distribution (Nominal Variable)",
-       x = "Treatment Group", y = "Count") +
-  scale_fill_viridis_d() +
-  theme_minimal() +
-  theme(legend.position = "none")
+# First, examine the structure of our dataset
+str(diet_data)
 
-print(treatment_plot)
-```
-
-```{webr-r}
-# Ordinal variable: Pain rating
-pain_plot <- measurement_demo %>%
-  count(pain_rating) %>%
-  ggplot(aes(x = factor(pain_rating), y = n, fill = factor(pain_rating))) +
-  geom_col(alpha = 0.8) +
-  labs(title = "Pain Rating Distribution (Ordinal Variable)",
-       subtitle = "1 = No pain, 10 = Severe pain",
-       x = "Pain Rating", y = "Count") +
-  scale_fill_viridis_d() +
-  theme_minimal() +
-  theme(legend.position = "none")
-
-print(pain_plot)
-```
-
-```{webr-r}
-# Continuous variable: Weight distribution
-weight_plot <- measurement_demo %>%
-  ggplot(aes(x = weight_kg)) +
-  geom_histogram(bins = 20, fill = "steelblue", alpha = 0.8, color = "white") +
-  geom_vline(aes(xintercept = mean(weight_kg)), 
-             color = "red", linetype = "dashed", linewidth = 1) +
-  labs(title = "Weight Distribution (Continuous Variable)",
-       x = "Weight (kg)", y = "Frequency") +
-  theme_minimal()
-
-print(weight_plot)
-```
-
-## Summary Statistics by Group
-
-```{webr-r}
-# Basic descriptive statistics by treatment group
-treatment_summary <- measurement_demo %>%
-  group_by(treatment_group) %>%
-  summarise(
-    n = n(),
-    mean_age = round(mean(age_years), 1),
-    mean_weight = round(mean(weight_kg), 1),
-    mean_pain = round(mean(pain_rating), 1),
-    .groups = 'drop'
+# Create labels for better understanding
+diet_labeled <- diet_data %>%
+  mutate(
+    sex_label = if_else(SEX == 0, "Women", "Men"),
+    exercise_label = case_when(
+      EXERCISE == 0 ~ "Control",
+      EXERCISE == 1 ~ "Aerobic", 
+      EXERCISE == 2 ~ "Resistance",
+      TRUE ~ "Unknown"
+    )
   )
 
-print(treatment_summary)
+# Variable classification table
+variable_classification <- tibble(
+  Variable = c("ID", "SEX", "FDWT3", "KCAL3", "PROT3GM", "FAT3GM", "CHO3GM", "EXERCISE"),
+  Description = c("Patient identifier", "Sex (0=women, 1=men)", "Food weight (grams)", 
+                 "Kilocalories per day", "Protein intake (grams)", "Fat intake (grams)", 
+                 "Carbohydrate intake (grams)", "Exercise type (0=control, 1=aerobic, 2=resistance)"),
+  Scale_Type = c("Nominal", "Nominal", "Ratio", "Ratio", "Ratio", "Ratio", "Ratio", "Nominal"),
+  Statistical_Use = c("Identification only", "Grouping variable", "Continuous analysis", 
+                     "Continuous analysis", "Continuous analysis", "Continuous analysis", 
+                     "Continuous analysis", "Grouping variable")
+)
+
+# Display using gtsummary-style formatting
+variable_classification %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = "Variable Classification in Diet Study",
+    subtitle = "Understanding measurement scales for appropriate analysis"
+  ) %>%
+  gt::cols_label(
+    Scale_Type = "Measurement Scale",
+    Statistical_Use = "How to Analyze"
+  ) %>%
+  gt::tab_style(
+    style = gt::cell_text(weight = "bold"),
+    locations = gt::cells_column_labels()
+  )
 ```
+
+**Clinical Answer**: Nominal variables (ID, SEX, EXERCISE) are used for grouping and counting. Ratio variables (all nutritional measures) allow mathematical operations like means and correlations.
+
+## Descriptive Analysis with ggplot2
+
+### Distribution of Exercise Groups (Nominal Variable)
+
+```{webr-r}
+# Visualize treatment group distribution using ggplot2
+exercise_plot <- diet_labeled %>%
+  count(exercise_label) %>%
+  ggplot(aes(x = exercise_label, y = n, fill = exercise_label)) +
+  geom_col(alpha = 0.8, color = "white", linewidth = 0.5) +
+  geom_text(aes(label = n), vjust = -0.5, size = 4, fontface = "bold") +
+  labs(
+    title = "Distribution of Exercise Interventions",
+    subtitle = "Sample sizes across treatment groups (n=45)",
+    x = "Exercise Group", 
+    y = "Number of Participants"
+  ) +
+  scale_fill_viridis_d(name = "Group") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    legend.position = "none"
+  )
+
+print(exercise_plot)
+```
+
+**Clinical Insight**: This bar chart shows balanced group sizes (15 per group), which is ideal for comparing interventions with equal statistical power.
+
+### Caloric Intake Distribution (Continuous Variable)
+
+```{webr-r}
+# Examine the distribution of caloric intake
+calorie_plot <- diet_labeled %>%
+  ggplot(aes(x = KCAL3)) +
+  geom_histogram(bins = 12, fill = "steelblue", alpha = 0.8, color = "white") +
+  geom_vline(aes(xintercept = mean(KCAL3, na.rm = TRUE)), 
+             color = "red", linetype = "dashed", linewidth = 1.2) +
+  annotate("text", 
+           x = mean(diet_data$KCAL3, na.rm = TRUE) + 200, 
+           y = Inf, 
+           label = paste("Mean:", round(mean(diet_data$KCAL3, na.rm = TRUE), 0), "kcal"),
+           vjust = 2, color = "red", fontface = "bold") +
+  labs(
+    title = "Distribution of Daily Caloric Intake",
+    subtitle = "Nutritional assessment across all participants",
+    x = "Kilocalories per Day", 
+    y = "Number of Participants"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 14, face = "bold"))
+
+print(calorie_plot)
+```
+
+**Clinical Insight**: The histogram shows the spread of daily caloric intake. The red line indicates average consumption (~2100 kcal), helping identify normal vs. unusual intake patterns.
+
+### Macronutrient Comparison by Exercise Group
+
+```{webr-r}
+# Compare protein intake across exercise groups using boxplots
+protein_boxplot <- diet_labeled %>%
+  ggplot(aes(x = exercise_label, y = PROT3GM, fill = exercise_label)) +
+  geom_boxplot(alpha = 0.8, outlier.color = "red", outlier.size = 2) +
+  geom_jitter(width = 0.2, alpha = 0.4, size = 1.5) +
+  labs(
+    title = "Protein Intake by Exercise Intervention",
+    subtitle = "Box plots show median (center line), quartiles (box), and outliers (red dots)",
+    x = "Exercise Group", 
+    y = "Protein Intake (grams/day)"
+  ) +
+  scale_fill_viridis_d(name = "Group") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    legend.position = "none"
+  )
+
+print(protein_boxplot)
+```
+
+**Clinical Insight**: Boxplots compare groups efficiently. The center line shows median intake, boxes show the middle 50% of participants, and outliers (red dots) identify unusual dietary patterns that might need clinical attention.
+
+## Professional Summary Tables with gtsummary
+
+```{webr-r}
+# Create comprehensive descriptive statistics table
+summary_table <- diet_labeled %>%
+  select(exercise_label, sex_label, KCAL3, PROT3GM, FAT3GM, CHO3GM) %>%
+  tbl_summary(
+    by = exercise_label,
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    digits = all_continuous() ~ 1,
+    label = list(
+      sex_label ~ "Sex",
+      KCAL3 ~ "Kilocalories/day",
+      PROT3GM ~ "Protein (g/day)",
+      FAT3GM ~ "Fat (g/day)", 
+      CHO3GM ~ "Carbohydrates (g/day)"
+    )
+  ) %>%
+  add_p() %>%  # Add p-values for group comparisons
+  add_overall() %>%  # Add overall column
+  modify_header(label ~ "**Characteristic**") %>%
+  modify_spanning_header(c("stat_1", "stat_2", "stat_3") ~ "**Exercise Group**") %>%
+  modify_footnote(
+    all_stat_cols() ~ "Mean (Standard Deviation) for continuous variables; n (%) for categorical variables"
+  )
+
+summary_table
+```
+
+**Clinical Insight**: This publication-ready table shows baseline characteristics by treatment group. P-values indicate whether groups differ significantly at baseline - important for interpreting intervention effects.
+
+## Practice Question 2: Pain VAS Scale Analysis
+
+Now let's analyze the different pain measurement scales shown in your materials:
+
+```{webr-r}
+# Simulate pain measurements using different VAS scales to demonstrate concepts
+set.seed(123)  # For reproducible results in class
+pain_demo <- tibble(
+  patient_id = 1:60,
+  # Scale A: Continuous line (0-100mm) - Most precise
+  vas_continuous = runif(60, 10, 80),
+  # Scale B: Discrete points (0-10) - Common in practice  
+  vas_discrete = sample(1:10, 60, replace = TRUE),
+  # Scale C: Ordinal categories (1-6) - Simple categories
+  vas_ordinal = sample(1:6, 60, replace = TRUE, 
+                      prob = c(0.15, 0.20, 0.25, 0.20, 0.15, 0.05)),
+  # Scale D: Faces scale (1-6) - Good for communication barriers
+  faces_scale = sample(1:6, 60, replace = TRUE,
+                      prob = c(0.25, 0.20, 0.20, 0.15, 0.15, 0.05))
+)
+
+# Compare the different pain scales
+pain_comparison <- pain_demo %>%
+  select(vas_continuous, vas_discrete, vas_ordinal, faces_scale) %>%
+  pivot_longer(everything(), names_to = "scale_type", values_to = "pain_score") %>%
+  mutate(
+    scale_label = case_when(
+      scale_type == "vas_continuous" ~ "A: Continuous Line (0-100mm)",
+      scale_type == "vas_discrete" ~ "B: Discrete Points (0-10)", 
+      scale_type == "vas_ordinal" ~ "C: Ordinal Categories (1-6)",
+      scale_type == "faces_scale" ~ "D: Faces Scale (1-6)"
+    ),
+    measurement_level = case_when(
+      scale_type == "vas_continuous" ~ "Ratio",
+      scale_type == "vas_discrete" ~ "Interval",
+      scale_type == "vas_ordinal" ~ "Ordinal", 
+      scale_type == "faces_scale" ~ "Ordinal"
+    )
+  )
+
+# Visualize the different pain scales
+pain_scales_plot <- pain_comparison %>%
+  ggplot(aes(x = pain_score, fill = measurement_level)) +
+  geom_histogram(bins = 10, alpha = 0.8, color = "white") +
+  facet_wrap(~scale_label, scales = "free", ncol = 2) +
+  labs(
+    title = "Comparison of Pain Measurement Scales",
+    subtitle = "Different scales provide different levels of measurement precision",
+    x = "Pain Score", 
+    y = "Frequency"
+  ) +
+  scale_fill_viridis_d(name = "Measurement Level") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    strip.text = element_text(size = 10, face = "bold")
+  )
+
+print(pain_scales_plot)
+```
+
+**Clinical Answer to Question 2**: 
+- **Scale A (Continuous)**: Ratio level - most detailed, allows all statistical analyses including means and t-tests
+- **Scale B (Discrete 0-10)**: Interval level - equal intervals, good for most statistical tests  
+- **Scale C (Ordinal categories)**: Ordinal level - ranked categories, limited to non-parametric tests
+- **Scale D (Faces)**: Ordinal level - useful for children or language barriers
+
+**Scale A (continuous line) provides the most detail** because it captures infinite gradations in pain intensity.
+
+## Practice Question 3: Measurement Reliability Simulation
+
+```{webr-r}
+# Simulate 5 repeated measurements of pain from Block A (triangular marker position)
+# Based on the visual, the triangle appears at approximately 35mm on a 100mm scale
+
+set.seed(456)  # For reproducible classroom results
+true_pain_level <- 35  # Estimated position of triangle in Block A
+
+# Simulate 5 repeated measurements with measurement error
+repeated_measurements <- tibble(
+  measurement_number = 1:5,
+  # Add random measurement error (±5mm is typical for VAS)
+  observed_score = true_pain_level + rnorm(5, mean = 0, sd = 3),
+  # Keep within valid 0-100 range
+  observed_score = pmax(0, pmin(100, observed_score))
+) %>%
+  mutate(
+    observed_score = round(observed_score, 1),
+    error = observed_score - true_pain_level,
+    absolute_error = abs(error)
+  )
+
+# Display the measurements
+cat("Five Repeated Pain Measurements from Block A:\n")
+print(repeated_measurements)
+
+# Calculate reliability statistics
+reliability_stats <- repeated_measurements %>%
+  summarise(
+    true_value = true_pain_level,
+    mean_measurement = round(mean(observed_score), 1),
+    mean_error = round(mean(error), 2),
+    mean_absolute_error = round(mean(absolute_error), 2),
+    standard_error = round(sd(observed_score), 2),
+    measurement_range = round(max(observed_score) - min(observed_score), 1)
+  )
+
+cat("\nReliability Analysis Summary:\n")
+print(reliability_stats)
+
+# Visualize measurement consistency
+reliability_plot <- repeated_measurements %>%
+  ggplot(aes(x = measurement_number, y = observed_score)) +
+  geom_hline(yintercept = true_pain_level, color = "red", linetype = "dashed", linewidth = 1) +
+  geom_line(color = "steelblue", linewidth = 1.2) +
+  geom_point(color = "steelblue", size = 4) +
+  geom_text(aes(label = paste0(observed_score, "mm")), 
+            vjust = -1.5, fontface = "bold", size = 3.5) +
+  annotate("text", x = 1.2, y = true_pain_level + 2, 
+           label = "True Pain Level (35mm)", color = "red", fontface = "bold") +
+  labs(
+    title = "Measurement Reliability: 5 Repeated VAS Readings",
+    subtitle = "Testing consistency of pain measurements from the same patient",
+    x = "Measurement Number", 
+    y = "Pain Score (0-100mm VAS)"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 14, face = "bold")) +
+  ylim(25, 45)
+
+print(reliability_plot)
+```
+
+**Clinical Answer to Question 3**: 
+
+The measurements show **random measurement error** around the true value. Key findings:
+- **Error type**: Random error (measurements scatter around true value)
+- **Reliability impact**: Small standard error indicates good reliability
+- **Clinical implications**: 
+  - Multiple measurements improve accuracy
+  - Training reduces measurement variability
+  - Some variation is normal and expected
+  - Acceptable measurement error is typically ±5mm for VAS
+
+## Summary Table: All Variables by Group
+
+```{webr-r}
+# Final comprehensive table showing all variables
+final_summary <- diet_labeled %>%
+  select(exercise_label, sex_label, FDWT3, KCAL3, PROT3GM, FAT3GM, CHO3GM) %>%
+  tbl_summary(
+    by = exercise_label,
+    statistic = list(all_continuous() ~ "{median} ({p25}, {p75})"),
+    digits = all_continuous() ~ 1,
+    label = list(
+      sex_label ~ "Sex",
+      FDWT3 ~ "Food weight (g)",
+      KCAL3 ~ "Kilocalories/day",
+      PROT3GM ~ "Protein (g/day)",
+      FAT3GM ~ "Fat (g/day)", 
+      CHO3GM ~ "Carbohydrates (g/day)"
+    )
+  ) %>%
+  add_overall() %>%
+  modify_header(label ~ "**Variable**") %>%
+  modify_spanning_header(c("stat_1", "stat_2", "stat_3") ~ "**Exercise Group**") %>%
+  modify_footnote(
+    all_stat_cols() ~ "Median (Q1, Q3) for continuous variables; n (%) for categorical variables"
+  )
+
+final_summary
+```
+
+## Key Takeaways for Medical Research
+
+1. **Variable types determine analytical options** - Ratio variables allow more sophisticated analyses
+2. **ggplot2 creates publication-ready figures** - Essential for medical journals  
+3. **gtsummary produces professional tables** - Standard for clinical research
+4. **The pipe operator (%>%) makes code readable** - Think "take data, then do this, then do that"
+5. **Measurement precision affects statistical power** - More precise measures detect smaller effects
+
+**Next Steps**: These descriptive methods prepare your data for inferential statistics, where you'll test hypotheses about treatment effects and group differences.
