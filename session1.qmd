@@ -11,14 +11,26 @@ Before diving into measurement concepts, let's introduce three key packages.
 **gtsummary**: grammar of tables for creating statistical summaries (aka table1)
 
 ```{webr-r}
-# load packages first
+#| results: 'asis'
+#| warning: false
+#| message: false
+
+# Load packages first
 library(haven)
+library(tidyverse)
+library(gtsummary)
 
-# load the diet and exercise data using haven::read_sav()
-diet_data<- read_sav("https://raw.githubusercontent.com/dkangsim-ehg/practical_statistics_companion_2025_ek/main/Diet45Ex.sav")
+# Load the diet and exercise data using haven::read_sav()
+# Use zap_labels() to remove SPSS formatting for cleaner analysis
+diet_data <- read_sav("https://raw.githubusercontent.com/dkangsim-ehg/practical_statistics_companion_2025_ek/main/Diet45Ex.sav") %>%
+  zap_labels() %>%      # Remove SPSS labels
+  zap_formats()         # Remove SPSS formatting
 
-#quick look at the data
-print(head(diet_data,8)) # show first 8 rows.
+# Quick look at the data structure
+str(diet_data)
+
+# Show first 8 rows
+print(head(diet_data, 8))
 ```
 
 ## The Pipe Operator (%>%): Making Code Readable
@@ -26,40 +38,55 @@ print(head(diet_data,8)) # show first 8 rows.
 The pipe operator `%>%` is essential for readable data analysis. It passes the result of one function to the next, like an assembly line:
 
 ```{webr-r}
+#| results: 'asis'
+
 # Without pipes (hard to read):
-# summary_result <- summarise(group_by(diet_data, EXERCISE), mean_kcal = mean(KCAL3, na.rm = TRUE))
+# summary_result <- summarise(group_by(diet_data, Exercise2), mean_kcal = mean(kcal3, na.rm = TRUE))
 
 # With pipes (easy to read):
-diet_data %>%
-  group_by(EXERCISE) %>%
-  summarise(mean_kcal = round(mean(KCAL3, na.rm = TRUE), 0), .groups = "drop")
+exercise_summary <- diet_data %>%
+  group_by(Exercise2) %>%
+  summarise(
+    n = n(),
+    mean_kcal = round(mean(kcal3, na.rm = TRUE), 0), 
+    .groups = "drop"
+  ) %>%
+  mutate(
+    exercise_group = case_when(
+      Exercise2 == 0 ~ "Control",
+      Exercise2 == 1 ~ "Aerobic", 
+      Exercise2 == 2 ~ "Resistance",
+      TRUE ~ "Unknown"
+    )
+  )
+
+print(exercise_summary)
 ```
 
-**Clinical Insight**: The pipe `%>%` makes code read like instructions: "Take the data, THEN group by exercise, THEN calculate mean calories."
+**Clinical Insight**: The pipe `%>%` makes code read like instructions: "Take the data (diet_data), _THEN_ group by exercise (Exercise2), THEN calculate mean calories (kcal3)."
 
 ## Practice Question 1: Variable Classification
 
 Let's examine each variable in our diet dataset and classify them according to measurement scales:
 
 ```{webr-r}
-# First, examine the structure of our dataset
-str(diet_data)
+#| results: 'asis'
 
-# Create labels for better understanding
+# Create labels for better understanding using correct variable names
 diet_labeled <- diet_data %>%
   mutate(
-    sex_label = if_else(SEX == 0, "Women", "Men"),
+    sex_label = if_else(Sex == 0, "Women", "Men"),
     exercise_label = case_when(
-      EXERCISE == 0 ~ "Control",
-      EXERCISE == 1 ~ "Aerobic", 
-      EXERCISE == 2 ~ "Resistance",
+      Exercise2 == 0 ~ "Control",
+      Exercise2 == 1 ~ "Aerobic", 
+      Exercise2 == 2 ~ "Resistance",
       TRUE ~ "Unknown"
     )
   )
 
-# Variable classification table
+# Variable classification table with CORRECT variable names
 variable_classification <- tibble(
-  Variable = c("ID", "SEX", "FDWT3", "KCAL3", "PROT3GM", "FAT3GM", "CHO3GM", "EXERCISE"),
+  Variable = c("ID", "Sex", "fdwt3", "kcal3", "prot3gm", "fat3gm", "cho3gm", "Exercise2"),
   Description = c("Patient identifier", "Sex (0=women, 1=men)", "Food weight (grams)", 
                  "Kilocalories per day", "Protein intake (grams)", "Fat intake (grams)", 
                  "Carbohydrate intake (grams)", "Exercise type (0=control, 1=aerobic, 2=resistance)"),
@@ -69,8 +96,8 @@ variable_classification <- tibble(
                      "Continuous analysis", "Grouping variable")
 )
 
-# Display using gtsummary-style formatting
-variable_classification %>%
+# Display using gtsummary-style formatting with explicit print
+classification_table <- variable_classification %>%
   gt::gt() %>%
   gt::tab_header(
     title = "Variable Classification in Diet Study",
@@ -84,9 +111,11 @@ variable_classification %>%
     style = gt::cell_text(weight = "bold"),
     locations = gt::cells_column_labels()
   )
+
+print(classification_table)
 ```
 
-**Clinical Answer**: Nominal variables (ID, SEX, EXERCISE) are used for grouping and counting. Ratio variables (all nutritional measures) allow mathematical operations like means and correlations.
+**Clinical Answer**: Nominal variables (ID, Sex, Exercise2) are used for grouping and counting. Ratio variables (all nutritional measures) allow mathematical operations like means and correlations.
 
 ## Descriptive Analysis with ggplot2
 
@@ -120,16 +149,16 @@ print(exercise_plot)
 ### Caloric Intake Distribution (Continuous Variable)
 
 ```{webr-r}
-# Examine the distribution of caloric intake
+# Examine the distribution of caloric intake using correct variable name
 calorie_plot <- diet_labeled %>%
-  ggplot(aes(x = KCAL3)) +
+  ggplot(aes(x = kcal3)) +
   geom_histogram(bins = 12, fill = "steelblue", alpha = 0.8, color = "white") +
-  geom_vline(aes(xintercept = mean(KCAL3, na.rm = TRUE)), 
+  geom_vline(aes(xintercept = mean(kcal3, na.rm = TRUE)), 
              color = "red", linetype = "dashed", linewidth = 1.2) +
   annotate("text", 
-           x = mean(diet_data$KCAL3, na.rm = TRUE) + 200, 
+           x = mean(diet_data$kcal3, na.rm = TRUE) + 200, 
            y = Inf, 
-           label = paste("Mean:", round(mean(diet_data$KCAL3, na.rm = TRUE), 0), "kcal"),
+           label = paste("Mean:", round(mean(diet_data$kcal3, na.rm = TRUE), 0), "kcal"),
            vjust = 2, color = "red", fontface = "bold") +
   labs(
     title = "Distribution of Daily Caloric Intake",
@@ -148,9 +177,9 @@ print(calorie_plot)
 ### Macronutrient Comparison by Exercise Group
 
 ```{webr-r}
-# Compare protein intake across exercise groups using boxplots
+# Compare protein intake across exercise groups using boxplots with correct variable name
 protein_boxplot <- diet_labeled %>%
-  ggplot(aes(x = exercise_label, y = PROT3GM, fill = exercise_label)) +
+  ggplot(aes(x = exercise_label, y = prot3gm, fill = exercise_label)) +
   geom_boxplot(alpha = 0.8, outlier.color = "red", outlier.size = 2) +
   geom_jitter(width = 0.2, alpha = 0.4, size = 1.5) +
   labs(
@@ -174,9 +203,11 @@ print(protein_boxplot)
 ## Professional Summary Tables with gtsummary
 
 ```{webr-r}
-# Create comprehensive descriptive statistics table
+#| results: 'asis'
+
+# Create comprehensive descriptive statistics table using correct variable names
 summary_table <- diet_labeled %>%
-  select(exercise_label, sex_label, KCAL3, PROT3GM, FAT3GM, CHO3GM) %>%
+  select(exercise_label, sex_label, kcal3, prot3gm, fat3gm, cho3gm) %>%
   tbl_summary(
     by = exercise_label,
     statistic = list(
@@ -186,10 +217,10 @@ summary_table <- diet_labeled %>%
     digits = all_continuous() ~ 1,
     label = list(
       sex_label ~ "Sex",
-      KCAL3 ~ "Kilocalories/day",
-      PROT3GM ~ "Protein (g/day)",
-      FAT3GM ~ "Fat (g/day)", 
-      CHO3GM ~ "Carbohydrates (g/day)"
+      kcal3 ~ "Kilocalories/day",
+      prot3gm ~ "Protein (g/day)",
+      fat3gm ~ "Fat (g/day)", 
+      cho3gm ~ "Carbohydrates (g/day)"
     )
   ) %>%
   add_p() %>%  # Add p-values for group comparisons
@@ -200,10 +231,41 @@ summary_table <- diet_labeled %>%
     all_stat_cols() ~ "Mean (Standard Deviation) for continuous variables; n (%) for categorical variables"
   )
 
-summary_table
+# Explicitly print the gtsummary table
+print(summary_table)
 ```
 
 **Clinical Insight**: This publication-ready table shows baseline characteristics by treatment group. P-values indicate whether groups differ significantly at baseline - important for interpreting intervention effects.
+
+## Simple Descriptive Statistics Table
+
+```{webr-r}
+#| results: 'asis'
+
+# Simple descriptive table showing all main variables
+simple_descriptive <- diet_labeled %>%
+  select(sex_label, exercise_label, fdwt3, kcal3, prot3gm, fat3gm, cho3gm) %>%
+  tbl_summary(
+    statistic = list(all_continuous() ~ "{median} ({p25}, {p75})"),
+    digits = all_continuous() ~ 1,
+    label = list(
+      sex_label ~ "Sex",
+      exercise_label ~ "Exercise Group",
+      fdwt3 ~ "Food weight (g)",
+      kcal3 ~ "Kilocalories/day",
+      prot3gm ~ "Protein (g/day)",
+      fat3gm ~ "Fat (g/day)", 
+      cho3gm ~ "Carbohydrates (g/day)"
+    )
+  ) %>%
+  modify_header(label ~ "**Variable**") %>%
+  modify_footnote(
+    all_stat_cols() ~ "n (%) for categorical variables; Median (Q1, Q3) for continuous variables"
+  )
+
+# Explicitly print the table
+print(simple_descriptive)
+```
 
 ## Practice Question 2: Pain VAS Scale Analysis
 
@@ -352,20 +414,22 @@ The measurements show **random measurement error** around the true value. Key fi
 ## Summary Table: All Variables by Group
 
 ```{webr-r}
-# Final comprehensive table showing all variables
+#| results: 'asis'
+
+# Final comprehensive table showing all variables with correct names
 final_summary <- diet_labeled %>%
-  select(exercise_label, sex_label, FDWT3, KCAL3, PROT3GM, FAT3GM, CHO3GM) %>%
+  select(exercise_label, sex_label, fdwt3, kcal3, prot3gm, fat3gm, cho3gm) %>%
   tbl_summary(
     by = exercise_label,
     statistic = list(all_continuous() ~ "{median} ({p25}, {p75})"),
     digits = all_continuous() ~ 1,
     label = list(
       sex_label ~ "Sex",
-      FDWT3 ~ "Food weight (g)",
-      KCAL3 ~ "Kilocalories/day",
-      PROT3GM ~ "Protein (g/day)",
-      FAT3GM ~ "Fat (g/day)", 
-      CHO3GM ~ "Carbohydrates (g/day)"
+      fdwt3 ~ "Food weight (g)",
+      kcal3 ~ "Kilocalories/day",
+      prot3gm ~ "Protein (g/day)",
+      fat3gm ~ "Fat (g/day)", 
+      cho3gm ~ "Carbohydrates (g/day)"
     )
   ) %>%
   add_overall() %>%
@@ -375,7 +439,8 @@ final_summary <- diet_labeled %>%
     all_stat_cols() ~ "Median (Q1, Q3) for continuous variables; n (%) for categorical variables"
   )
 
-final_summary
+# Explicitly print the final table
+print(final_summary)
 ```
 
 ## Key Takeaways for Medical Research
@@ -385,5 +450,6 @@ final_summary
 3. **gtsummary produces professional tables** - Standard for clinical research
 4. **The pipe operator (%>%) makes code readable** - Think "take data, then do this, then do that"
 5. **Measurement precision affects statistical power** - More precise measures detect smaller effects
+6. **Always check variable names after importing SPSS files** - Use `zap_labels()` and `zap_formats()` for cleaner data
 
 **Next Steps**: These descriptive methods prepare your data for inferential statistics, where you'll test hypotheses about treatment effects and group differences.
