@@ -4,26 +4,7 @@
 #| context: setup
 #| echo: false
 
-# Data setup - packages already loaded globally
-set.seed(42)
-
-# Create sample medical research dataset
-n_patients <- 200
-measurement_demo <- tibble(
-  patient_id = 1:n_patients,
-  gender = sample(c("Male", "Female"), n_patients, replace = TRUE, prob = c(0.45, 0.55)),
-  treatment_group = sample(c("Control", "Treatment A", "Treatment B"), n_patients, replace = TRUE),
-  pain_rating = sample(1:10, n_patients, replace = TRUE),
-  age_years = sample(18:85, n_patients, replace = TRUE),
-  weight_kg = round(rnorm(n_patients, mean = 70, sd = 15), 1),
-  blood_pressure = round(rnorm(n_patients, mean = 120, sd = 20), 0)
-) %>%
-  mutate(
-    weight_kg = pmax(40, pmin(150, weight_kg)),
-    blood_pressure = pmax(80, pmin(180, blood_pressure))
-  )
-
-cat("Data loaded successfully!")
+diet_data<- read_csv("https://github.com/dkangsim-ehg/practical_statistics_companion_2025_ek/blob/main/diet45ex.csv")
 ```
 
 ## Understanding Variables and Measurement Scales
@@ -35,16 +16,7 @@ In biostatistics and medical research, understanding the type of data you're wor
 ```{webr-r}
 # Display our medical research dataset
 cat("Sample Medical Research Dataset:\n")
-print(head(measurement_demo, 8))
-
-cat("\nVariable Classification:\n")
-cat("• patient_id: Identifier (nominal)\n")
-cat("• gender: Nominal variable\n")
-cat("• treatment_group: Nominal variable\n")
-cat("• pain_rating: Ordinal variable (1-10 scale)\n")
-cat("• age_years: Ratio variable (continuous)\n")
-cat("• weight_kg: Ratio variable (continuous)\n")
-cat("• blood_pressure: Ratio variable (continuous)\n")
+print(head(diet_data, 8))
 ```
 
 ### Visualizing Variable Types
