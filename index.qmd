@@ -1,0 +1,73 @@
+# Interactive R Companion for SPSS Users
+
+## Welcome to Your Learning Journey
+
+This interactive companion helps you explore statistical concepts using R while following your SPSS-based statistics course. The materials are designed specifically for biostatistics and medical research applications.
+
+::: {.callout-important}
+## Companion, Not Substitute
+This guide serves as a **learning companion** to your SPSS-based statistics course, not a replacement. While your primary instruction uses SPSS, this resource helps you explore how the same statistical concepts can be implemented in R.
+:::
+
+## Why Learn R for Medical Research?
+
+**Reproducibility**: R scripts document every step of your analysis, making your research completely reproducible.
+
+**Flexibility**: With thousands of packages available, R can handle virtually any statistical method needed in medical research.
+
+**Open Source**: R is free and widely used in academic and clinical research settings.
+
+## Course Structure
+
+### [Session 1: Concepts of Measurement](session1.qmd)
+- Understanding different types of variables
+- Measurement scales (nominal, ordinal, interval, ratio)
+- Data quality issues in medical research
+- Practical examples with patient data
+
+### [Session 3: Descriptive Statistics](session3.qmd)
+- Measures of central tendency (mean, median, mode)
+- Measures of variability (standard deviation, variance)
+- Data visualization techniques
+- Group comparisons and correlation analysis
+
+## Getting Started
+
+```{webr-r}
+# Test that webR is working
+cat("Welcome to interactive R learning!\n")
+cat("webR is ready for statistical analysis.\n")
+
+# Quick demonstration
+sample_data <- data.frame(
+  patient = 1:5,
+  age = c(45, 52, 38, 61, 49),
+  treatment = c("A", "B", "A", "B", "A")
+)
+
+print(sample_data)
+```
+
+## Interactive Learning Features
+
+::: {.callout-tip}
+## Hands-On Experience
+All code blocks are interactive! You can modify and run them directly in your browser. This approach helps you learn by doing, which is essential for mastering statistical concepts.
+:::
+
+### What Makes This Different?
+
+- **Browser-based**: No software installation required
+- **Medical examples**: All examples use realistic medical/clinical data
+- **SPSS comparison**: Concepts explained in terms familiar to SPSS users
+- **Progressive learning**: Build skills step-by-step
+- **Immediate feedback**: See results instantly as you learn
+
+## Technical Setup
+
+This companion uses:
+- **webR**: R running directly in your browser
+- **Tidyverse**: Modern R packages for data analysis
+- **Interactive examples**: Modify and run code immediately
+
+Ready to begin? Choose a session from the navigation menu above!
