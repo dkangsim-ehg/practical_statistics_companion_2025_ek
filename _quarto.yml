@@ -1,0 +1,99 @@
+project:
+  type: website
+  output-dir: docs
+  preview:
+    port: 4200
+    browser: true
+  render:
+    - "*.qmd"
+
+lang: en-US
+
+website:
+  title: "Interactive R Companion for SPSS Users"
+  subtitle: "2025 Practical Statistics for Medical Research"
+  
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: session1.qmd
+        text: "Session 1: Measurement"  
+      - href: session3.qmd
+        text: "Session 3: Descriptive Stats"
+    
+  page-footer:
+    left: |
+      Interactive R Companion for SPSS Users
+    right: |
+      Built with <a href="https://quarto.org/">Quarto</a> and <a href="https://docs.r-wasm.org/webr/">webR</a>
+
+  favicon: favicon.ico
+  
+  author:
+    - name: "Jan Hughes-Austin"
+    - name: "D. Eastern Kang Sim"
+  date: today
+  date-format: "MMMM DD, YYYY"
+
+# Global format settings
+format:
+  html:
+    theme:
+      light: [cosmo, custom.scss]
+    toc: true
+    toc-location: left
+    toc-expand: 2
+    code-fold: false
+    code-tools: true
+    code-overflow: wrap
+    code-link: true
+    embed-resources: false
+    
+    # Styling
+    css: styles.css
+    callout-appearance: simple
+    
+    # Code and table settings
+    tbl-cap-location: bottom
+    fig-cap-location: bottom
+
+# WebR configuration - this is the key improvement
+filters:
+  - webr
+
+webr:
+  # Only essential packages for performance
+  packages: 
+    - "dplyr"
+    - "tidyr" 
+    - "ggplot2"
+  # Auto-load packages globally
+  autoload-packages: true
+  # Show loading status
+  show-startup-message: true
+  # Cache packages for faster loading
+  cache-packages: true
+
+# Global code execution settings
+execute:
+  echo: false
+  warning: false
+  message: false
+  cache: false
+
+# Global knitr settings
+knitr:
+  opts_chunk:
+    message: false
+    warning: false
+    collapse: true
+    comment: "#>"
+    fig.width: 8
+    fig.height: 6
+    dpi: 300
+
+# Editor settings
+editor:
+  markdown:
+    wrap: sentence
