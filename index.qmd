@@ -1,82 +1,422 @@
 # Interactive R Companion for SPSS Users
 
-## Welcome to Your Learning Journey
+::: {.hero-banner}
+## Welcome to Your Statistical Learning Journey
 
-This interactive companion helps you explore statistical concepts using R while following your SPSS-based statistics course. The materials are designed specifically for biostatistics and medical research applications.
+This interactive companion helps you explore statistical concepts using R while following your SPSS-based statistics course. Designed specifically for biostatistics and medical research applications.
+:::
+
+```{webr-r}
+#| context: setup
+#| echo: false
+
+# Global setup - runs once when the site loads
+# Packages are already loaded via _quarto.yml
+
+# Set global options
+options(
+  digits = 3,
+  scipen = 999,
+  width = 80
+)
+
+# Set seed for reproducibility across all sessions
+set.seed(42)
+
+# Create Diet Data (diet45ex.csv equivalent)
+diet_data <- tibble(
+  ID = 1:45,
+  Sex = sample(c(1, 2), 45, replace = TRUE, prob = c(0.47, 0.53)),  # 1=Male, 2=Female
+  fdwt3 = sample(c(40:85), 45, replace = TRUE),
+  kcal3 = round(rnorm(45, mean = 2200, sd = 600), 0),
+  prot3gm = round(rnorm(45, mean = 85, sd = 25), 1),
+  fat3gm = round(rnorm(45, mean = 75, sd = 20), 1),
+  cho3gm = round(rnorm(45, mean = 280, sd = 80), 1),
+  ncal3gm = round(rnorm(45, mean = 1800, sd = 500), 0),
+  pctfat3 = round(rnorm(45, mean = 30, sd = 8), 1),
+  pctcho3 = round(rnorm(45, mean = 50, sd = 10), 1),
+  pctpro3 = round(rnorm(45, mean = 15, sd = 4), 1),
+  Exercise2 = sample(c(1, 2, 3), 45, replace = TRUE, prob = c(0.3, 0.4, 0.3)),  # 1=Low, 2=Moderate, 3=High
+  Exercise_Sex = NA
+) %>%
+  mutate(
+    # Create interaction variable
+    Exercise_Sex = case_when(
+      Sex == 1 & Exercise2 == 1 ~ 1,  # Male_Low
+      Sex == 1 & Exercise2 == 2 ~ 2,  # Male_Moderate  
+      Sex == 1 & Exercise2 == 3 ~ 3,  # Male_High
+      Sex == 2 & Exercise2 == 1 ~ 4,  # Female_Low
+      Sex == 2 & Exercise2 == 2 ~ 5,  # Female_Moderate
+      Sex == 2 & Exercise2 == 3 ~ 6   # Female_High
+    ),
+    # Ensure realistic ranges
+    kcal3 = pmax(1200, pmin(4000, kcal3)),
+    prot3gm = pmax(20, pmin(150, prot3gm)),
+    fat3gm = pmax(20, pmin(120, fat3gm)),
+    cho3gm = pmax(100, pmin(500, cho3gm)),
+    ncal3gm = pmax(800, pmin(3000, ncal3gm)),
+    pctfat3 = pmax(15, pmin(45, pctfat3)),
+    pctcho3 = pmax(30, pmin(70, pctcho3)),
+    pctpro3 = pmax(8, pmin(25, pctpro3))
+  )
+
+# Create Muscle Area Data (musclearea.csv equivalent)
+muscle_data <- tibble(
+  AnimalID = rep(1:6, each = 3),
+  MuscleType = rep(1:3, times = 6),  # 1=Type1, 2=Type2a, 3=Type2x
+  FiberArea = c(
+    # Animal 1
+    round(rnorm(3, mean = c(4200, 5800, 6500), sd = 800), 0),
+    # Animal 2  
+    round(rnorm(3, mean = c(3900, 5200, 6100), sd = 750), 0),
+    # Animal 3
+    round(rnorm(3, mean = c(4500, 6200, 7200), sd = 900), 0),
+    # Animal 4
+    round(rnorm(3, mean = c(4100, 5500, 6800), sd = 700), 0),
+    # Animal 5
+    round(rnorm(3, mean = c(3800, 5000, 5900), sd = 650), 0),
+    # Animal 6
+    round(rnorm(3, mean = c(4300, 5900, 6900), sd = 850), 0)
+  )
+) %>%
+  mutate(
+    # Ensure realistic fiber areas (muscle fiber areas in micrometers squared)
+    FiberArea = pmax(2500, pmin(8500, FiberArea))
+  )
+
+# Create shared medical datasets from previous setup
+n_patients <- 200
+medical_data <- tibble(
+  patient_id = 1:n_patients,
+  gender = sample(c("Male", "Female"), n_patients, replace = TRUE, prob = c(0.45, 0.55)),
+  age = sample(18:85, n_patients, replace = TRUE),
+  treatment_group = sample(c("Control", "Treatment A", "Treatment B"), n_patients, replace = TRUE),
+  pain_rating = sample(1:10, n_patients, replace = TRUE,
+                      prob = c(0.05, 0.05, 0.1, 0.1, 0.15, 0.15, 0.15, 0.1, 0.1, 0.05)),
+  weight_kg = round(rnorm(n_patients, mean = 70, sd = 15), 1),
+  blood_pressure_systolic = round(rnorm(n_patients, mean = 120, sd = 20), 0),
+  num_medications = rpois(n_patients, lambda = 2)
+) %>%
+  mutate(
+    # Ensure realistic ranges
+    weight_kg = pmax(40, pmin(150, weight_kg)),
+    blood_pressure_systolic = pmax(80, pmin(180, blood_pressure_systolic)),
+    age = pmax(18, pmin(85, age))
+  )
+
+# Student Performance Dataset  
+n_students <- 150
+student_data <- tibble(
+  student_id = 1:n_students,
+  gender = sample(c("Male", "Female"), n_students, replace = TRUE, prob = c(0.45, 0.55)),
+  age = sample(18:25, n_students, replace = TRUE),
+  year_in_school = sample(1:4, n_students, replace = TRUE, prob = c(0.3, 0.25, 0.25, 0.2)),
+  math_score = rnorm(n_students, mean = 78, sd = 12),
+  science_score = rnorm(n_students, mean = 82, sd = 10),
+  english_score = rnorm(n_students, mean = 75, sd = 15),
+  study_hours_week = rpois(n_students, lambda = 8)
+) %>%
+  mutate(
+    # Ensure realistic score ranges
+    math_score = pmax(0, pmin(100, math_score)),
+    science_score = pmax(0, pmin(100, science_score)),
+    english_score = pmax(0, pmin(100, english_score)),
+    # Add realistic correlation between math and science
+    science_score = science_score + 0.3 * (math_score - mean(math_score)),
+    science_score = pmax(0, pmin(100, science_score))
+  )
+
+# Confirmation message
+cat("✓ Global setup complete! All datasets loaded and ready.\n")
+cat("✓ Packages loaded: dplyr, tidyr, ggplot2, stringr, broom, car, pwr\n")
+cat("✓ Datasets available: medical_data, student_data, diet_data, muscle_data\n")
+cat("✓ Ready for statistical analysis!\n")
+```
+
+## Important Note: Learning Companion
 
 ::: {.callout-important}
 ## Companion, Not Substitute
-This guide serves as a **learning companion** to your SPSS-based statistics course, not a replacement. While your primary instruction uses SPSS, this resource helps you explore how the same statistical concepts can be implemented in R.
+This interactive guide serves as a **learning companion** to your SPSS-based statistics course, not a replacement. While your primary instruction uses SPSS, this resource helps you explore how the same statistical concepts and analyses can be implemented in R.
 :::
 
 ## Why Learn R for Medical Research?
 
-**Reproducibility**: R scripts document every step of your analysis, making your research completely reproducible. 
+R offers unique advantages for statistical analysis in medical and clinical research:
 
-**Flexibility**: With thousands of packages available, R can handle virtually any statistical method needed for your research. 
+::: {.grid}
 
-**Open Source**: R is free and widely used in academic and clinical research settings.
+::: {.g-col-4}
+### Reproducibility
+R scripts document every step of your analysis, making your research completely reproducible. Anyone can see exactly what you did and replicate your results.
+:::
 
-## Getting Started with R
+::: {.g-col-4}
+### Flexibility  
+With thousands of packages available, R can handle virtually any statistical method or data visualization need in medical research.
+:::
 
-### Essential Setup
+::: {.g-col-4}
+### Open Source
+R is free and widely used in academic, clinical, and pharmaceutical research settings worldwide.
+:::
 
-While this companion runs R directly in your browser, you may want to set up R on your computer for analysis projects: 
+:::
 
-1. **Base R**: Download from [r-project.org](https://www.r-project.org/)
-2. **RStudio**: Free desktop application from [rstudio.com](https://www.rstudio.com/products/RStudio/)
+## Quick Start Test
 
-
-### Best Practices
-
-**Documentation**: Use R Markdown (.Rmd) files to integrate code, results, and narrative of your thinking process. 
-
-**Package Management**: Install packages once (**install.packages()**), load them each session (**library()**). This page will mainly use the `tidyverse` collection for easy data analysis workflows. 
-
-Let's test that `webR` is working. Give it a try! Press the green play button and see your output. You can also make edits. 
+Let's verify everything is working correctly:
 
 ```{webr-r}
-# Test that webR is working
-cat("Welcome to interactive R learning!\n")
-cat("webR is ready for statistical analysis.\n")
+# Test that webR and our datasets are ready
+cat("=== SYSTEM CHECK ===\n")
+cat("R version:", R.version.string, "\n")
+cat("Loaded packages:", paste(loadedNamespaces()[loadedNamespaces() %in% c("dplyr", "tidyr", "ggplot2", "stringr", "broom", "car", "pwr")], collapse = ", "), "\n")
 
-# Quick demonstration
-sample_data <- data.frame(
-  patient = 1:5,
-  age = c(45, 52, 38, 61, 49),
-  treatment = c("A", "B", "A", "B", "A")
-)
+# Quick data preview
+cat("\n=== DATA PREVIEW ===\n")
+cat("Medical dataset:", nrow(medical_data), "patients\n")
+cat("Student dataset:", nrow(student_data), "students\n")
+cat("Diet dataset:", nrow(diet_data), "participants\n")
+cat("Muscle dataset:", nrow(muscle_data), "observations\n")
 
-print(sample_data)
+# Simple analysis example
+quick_summary <- medical_data %>%
+  group_by(treatment_group) %>%
+  summarise(
+    n = n(),
+    mean_age = round(mean(age), 1),
+    mean_pain = round(mean(pain_rating), 1),
+    .groups = 'drop'
+  )
+
+cat("\n=== SAMPLE ANALYSIS ===\n")
+print(quick_summary)
 ```
+
+## Course Sessions Overview
+
+### [S01: Concepts of Measurement](s01.qmd) {#sec-s01-link}
+
+**Focus**: Understanding variable types and measurement scales
+- Variable classification (nominal, ordinal, interval, ratio)
+- Data quality assessment and missing data handling
+- Medical measurement examples (pain scales, lab values, demographics)
+- Appropriate statistical methods for each data type
+
+::: {.callout-tip}
+**Key Concept**: Variable type determines which statistical methods are valid.
+:::
+
+### [S02: Power Analysis and Sample Size](s02.qmd) {#sec-s02-link}
+
+**Focus**: Determining adequate sample sizes for studies
+- Statistical power concepts and calculations
+- Type I and Type II error rates
+- Sample size determination for common study designs
+- Power analysis for clinical trials and surgical research
+
+::: {.callout-tip}
+**Key Concept**: Proper sample size planning prevents underpowered studies.
+:::
+
+### [S03: Descriptive Statistics](s03.qmd) {#sec-s03-link}
+
+**Focus**: Summarizing and describing data distributions
+- Measures of central tendency (mean, median, mode)
+- Measures of variability (SD, variance, IQR)
+- Data visualization techniques (histograms, box plots)
+- Group comparisons using descriptive methods
+
+::: {.callout-tip}
+**Key Concept**: Always describe your data before testing hypotheses.
+:::
+
+### [S04: Statistical Inference & Hypothesis Testing](s04.qmd) {#sec-s04-link}
+
+**Focus**: Foundation of statistical testing
+- Null and alternative hypotheses
+- P-values and statistical significance
+- Confidence intervals and interpretation
+- Common misconceptions in hypothesis testing
+
+::: {.callout-tip}
+**Key Concept**: Statistical significance ≠ clinical significance.
+:::
+
+### [S05: T-Tests for Comparing Means](s05.qmd) {#sec-s05-link}
+
+**Focus**: Comparing means between groups
+- One-sample, independent, and paired t-tests
+- Assumptions and diagnostics
+- Effect sizes and clinical interpretation
+- Surgical outcome comparisons
+
+::: {.callout-tip}
+**Key Concept**: Different t-tests for different study designs.
+:::
+
+### [S06: ANOVA - Comparing Multiple Groups](s06.qmd) {#sec-s06-link}
+
+**Focus**: Analysis of variance for multiple group comparisons
+- One-way and factorial ANOVA
+- Post-hoc testing and multiple comparisons
+- Effect sizes and practical significance
+- Treatment group comparisons
+
+::: {.callout-tip}
+**Key Concept**: ANOVA tests for any differences; post-hoc tests identify which groups differ.
+:::
+
+### [S07: Multiple Comparisons and Post-Hoc Tests](s07.qmd) {#sec-s07-link}
+
+**Focus**: Controlling for multiple testing
+- Family-wise error rate control
+- Bonferroni, Tukey, and other corrections
+- Planned vs. unplanned comparisons
+- Clinical trial applications
+
+::: {.callout-tip}
+**Key Concept**: Multiple testing inflates Type I error; corrections are essential.
+:::
+
+### [S08: Non-Parametric Tests](s08.qmd) {#sec-s08-link}
+
+**Focus**: Distribution-free statistical methods
+- Mann-Whitney U test and Wilcoxon signed-rank
+- Kruskal-Wallis test
+- When to use non-parametric tests
+- Ordinal data analysis in medical research
+
+::: {.callout-tip}
+**Key Concept**: Non-parametric tests for non-normal data or ordinal variables.
+:::
+
+### [S09: Chi-Square and Categorical Data Analysis](s09.qmd) {#sec-s09-link}
+
+**Focus**: Analyzing categorical variables and associations
+- Chi-square test of independence
+- Fisher's exact test
+- Odds ratios and risk ratios
+- Cross-tabulation analysis
+
+::: {.callout-tip}
+**Key Concept**: Chi-square tests relationships between categorical variables.
+:::
+
+### [S10: Linear Regression and ANCOVA](s10.qmd) {#sec-s10-link}
+
+**Focus**: Modeling continuous outcomes
+- Simple and multiple linear regression
+- Regression assumptions and diagnostics
+- ANCOVA (analysis of covariance)
+- Confounding variable control
+
+::: {.callout-tip}
+**Key Concept**: Regression models relationships while controlling for confounders.
+:::
+
+### [S11: Logistic Regression](s11.qmd) {#sec-s11-link}
+
+**Focus**: Modeling binary and categorical outcomes
+- Binary and multinomial logistic regression
+- Odds ratios and confidence intervals
+- Model diagnostics and goodness of fit
+- Clinical prediction models
+
+::: {.callout-tip}
+**Key Concept**: Logistic regression for binary outcomes (success/failure, disease/no disease).
+:::
+
+### [S12: Epidemiology and Risk Measurement](s12.qmd) {#sec-s12-link}
+
+**Focus**: Measuring disease risk and exposure effects
+- Relative risk and odds ratios
+- Sensitivity, specificity, and diagnostic tests
+- Survival analysis basics
+- Evidence-based medicine applications
+
+::: {.callout-tip}
+**Key Concept**: Epidemiological measures quantify disease risk and test performance.
+:::
 
 ## Interactive Learning Features
 
-::: {.callout-tip}
-## Hands-On Experience
-All code blocks are interactive! You can modify and run them directly in your browser. This approach helps you learn by doing, which is essential for mastering statistical concepts.
+This companion uses cutting-edge web technology to provide an interactive learning experience:
+
+::: {.grid}
+
+::: {.g-col-6}
+### ✨ Features
+- **Browser-based**: No software installation required
+- **Interactive code**: Modify and run examples instantly  
+- **Medical examples**: Realistic clinical and research data
+- **SPSS comparison**: Concepts explained in familiar terms
+- **Progressive learning**: Build skills step-by-step
 :::
 
-### What Makes This Different?
-
-- **Browser-based**: No software installation required
-- **SPSS comparison**: Same datasets used for comparisons
-- **Immediate feedback**: See results instantly as you learn
-
-## Technical Setup
-
-This companion uses:
-
+::: {.g-col-6}
+### 🔧 Technology
 - **webR**: R running directly in your browser
-- **tidyverse**: Modern R packages for data analysis
-- **Datasets**: Same datasets used in the class
+- **Tidyverse**: Modern R packages for data analysis
+- **Quarto**: Professional publishing system
+- **Immediate feedback**: See results as you learn
+:::
+
+:::
+
+## Getting Started
+
+1. **Choose a session** from the navigation menu
+2. **Read the explanations** to understand concepts
+3. **Run the code examples** by clicking the "Run Code" buttons
+4. **Modify the code** to explore different scenarios
+5. **Check your understanding** with the interactive exercises
+
+```{webr-r}
+# Try modifying this code!
+# Example using our diet data
+diet_summary <- diet_data %>%
+  mutate(
+    sex_label = ifelse(Sex == 1, "Male", "Female"),
+    exercise_label = case_when(
+      Exercise2 == 1 ~ "Low",
+      Exercise2 == 2 ~ "Moderate", 
+      Exercise2 == 3 ~ "High"
+    )
+  ) %>%
+  group_by(sex_label, exercise_label) %>%
+  summarise(
+    n = n(),
+    mean_kcal = round(mean(kcal3), 0),
+    mean_protein = round(mean(prot3gm), 1),
+    .groups = 'drop'
+  )
+
+print(diet_summary)
+
+# Quick visualization
+ggplot(diet_data, aes(x = kcal3, y = prot3gm, color = factor(Exercise2))) +
+  geom_point(size = 2, alpha = 0.7) +
+  labs(title = "Dietary Analysis: Calories vs Protein by Exercise Level",
+       x = "Calories (kcal)", y = "Protein (g)",
+       color = "Exercise Level") +
+  scale_color_viridis_d(labels = c("Low", "Moderate", "High")) +
+  theme_minimal()
+```
+
+## Ready to Begin?
+
+Choose your starting point from the navigation menu. Each session builds on statistical concepts while showing you how to implement them in R.
+
+**Recommended path**: Start with S01 to understand measurement concepts, then progress sequentially through the sessions.
 
 ::: {.callout-note}
-## Resources for more? 
-1. **Data Carpentry**: [R for Social Scientsit](https://datacarpentry.github.io/r-socialsci/00-intro.html)
+## Need Help?
+Each code block is interactive - you can modify the code and see immediate results. Don't be afraid to experiment!
 :::
 
-Ready to begin? **Choose a session from the navigation menu above!**
+---
 
-
+*This companion focuses on practical applications of statistics in medical research using R programming techniques.*
 
