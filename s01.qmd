@@ -1,6 +1,6 @@
 # S01: Concepts of Measurement {#sec-s01}
 
-Understanding the type of data you're working with is the foundation of all statistical analysis. In research, this knowledge determines which statistical methods are appropriate and how to interpret your results correctly.
+Understanding the type of data you're working with is the foundation of all statistical analysis. In research, this knowledge determines **which** statistical methods are appropriate and **how** to interpret your results correctly.
 
 ## Essential R packages
 
@@ -59,7 +59,7 @@ diet_data <- read_sav("https://raw.githubusercontent.com/dkangsim-ehg/practical_
 diet_data <- read_csv("file_directory/diet45ex.csv")
 ```
 
-**Why **CSV** Files Are Preferred for Reproducibility:**
+Why **CSV** Files Are Preferred for Reproducibility:
 
 CSV (Comma-Separated Values) files are the gold standard for data sharing in research because they:
 
@@ -71,7 +71,6 @@ CSV (Comma-Separated Values) files are the gold standard for data sharing in res
 - **No licensing dependencies**: Don't require specific software to access
 
 ::: {.callout-important}
-## DATA HAS BEEN LOADED ALREDY
 For this course, all data has been _manually entered_ in the background to ensure compatibility with the webR environment.
 :::
 
@@ -120,8 +119,7 @@ exercise_summary <- diet_labeled %>%
 print(exercise_summary)
 ```
 
-**Clinical Insight**: The pipe `%>%` makes code read like instructions: "Take the data (diet_data), _THEN_ group by exercise (Exercise2), THEN calculate mean calories (kcal3)."
-
+The pipe `%>%` makes code read like instructions: "Take the data (diet_data), _THEN_ group by exercise (Exercise2), THEN calculate mean calories (kcal3)."
 
 ## Descriptive Analysis with ggplot2
 
@@ -147,7 +145,7 @@ exercise_plot <- diet_labeled %>%
 print(exercise_plot)
 ```
 
-**Clinical Insight**: Bar charts are appropriate for nominal (categorical) data. Each bar represents a distinct category with no inherent order.
+**Data Insight**: Bar charts are appropriate for nominal (categorical) data. Each bar represents a distinct category with no inherent order.
 
 ### Caloric Intake Distribution (Continuous Variable)
 
@@ -173,7 +171,7 @@ mean_calories <- round(mean(diet_labeled$kcal3, na.rm = TRUE), 0)
 paste("Mean caloric intake:", mean_calories, "kcal/day")
 ```
 
-**Clinical Insight**: Histograms show the distribution shape of continuous (ratio) data. The mean (red line) summarizes central tendency for ratio variables.
+**Data Insight**: Histograms show the distribution shape of continuous (ratio) data. The mean (red line) summarizes central tendency for ratio variables.
 
 ### Descriptive statistics table
 
@@ -205,7 +203,7 @@ summary_stats <- diet_labeled %>%
 print(summary_stats)
 ```
 
-**Clinical Insight**: This table format is standard for medical journals' "Table 1" showing baseline characteristics by treatment group.
+**Data Insight**: This table format is standard for medical journals' "Table 1" showing baseline characteristics by treatment group.
 
 The `gtsummary` package can render a beautiful Table1, but its output cannot be rendered properly as the output here. Try this code in your local machine: 
 
