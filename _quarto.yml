@@ -12,7 +12,7 @@ website:
       - href: index.qmd
         text: "Home"
       - href: s01.qmd
-        text: "S01"
+        text: "Session01"
       - href: s02.qmd
         text: "S02"
       - href: s03.qmd
@@ -37,8 +37,8 @@ website:
         text: "S12"
     
   page-footer:
-    left: "Interactive R Companion for SPSS Users"
-    right: "Built with Quarto and webR"
+    left: "Instructor: Jan Hughes-Austin, PhD"
+    right: "Assistant: D. Eastern Kang Sim, PhD"
 
 format:
   html:
