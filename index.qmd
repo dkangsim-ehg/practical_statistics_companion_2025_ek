@@ -56,73 +56,85 @@ print(sample_data)
 ### [S01: Concepts of Measurement](s01.qmd) {#sec-s01-link}
 
 ::: {.callout-tip}
-**Key Concept**: Variable type determines which statistical methods are valid.
+## Key Concept
+Variable type determines which statistical methods are valid.
 :::
 
 ### [S02: Power Analysis and Sample Size](s02.qmd) {#sec-s02-link}
 
 ::: {.callout-tip}
-**Key Concept**: Proper sample size planning prevents underpowered studies.
+## Key Concept
+Proper sample size planning prevents underpowered studies.
 :::
 
 ### [S03: Descriptive Statistics](s03.qmd) {#sec-s03-link}
 
 ::: {.callout-tip}
-**Key Concept**: Describe your data before testing hypotheses.
+## Key Concept
+Describe your data before testing hypotheses.
 :::
 
 ### [S04: Statistical Inference & Hypothesis Testing](s04.qmd) {#sec-s04-link}
 
 ::: {.callout-tip}
-**Key Concept**: Statistical significance ≠ clinical significance.
+## Key Concept
+Statistical significance ≠ clinical significance.
 :::
 
 ### [S05: T-Tests for Comparing Means](s05.qmd) {#sec-s05-link}
 
 ::: {.callout-tip}
-**Key Concept**: Different t-tests for different study designs.
+## Key Concept
+Different t-tests for different study designs.
 :::
 
 ### [S06: ANOVA - Comparing Multiple Groups](s06.qmd) {#sec-s06-link}
 
 ::: {.callout-tip}
-**Key Concept**: ANOVA tests for any differences; post-hoc tests identify which groups differ.
+## Key Concept
+ANOVA tests for any differences; post-hoc tests identify which groups differ.
 :::
 
 ### [S07: Multiple Comparisons and Post-Hoc Tests](s07.qmd) {#sec-s07-link}
 
 ::: {.callout-tip}
-**Key Concept**: Multiple testing inflates Type I error; corrections are essential.
+## Key Concept
+Multiple testing inflates Type I error; corrections are essential.
 :::
 
 ### [S08: Non-Parametric Tests](s08.qmd) {#sec-s08-link}
 
 ::: {.callout-tip}
-**Key Concept**: Non-parametric tests for non-normal data or ordinal variables.
+## Key Concept
+Non-parametric tests for non-normal data or ordinal variables.
 :::
 
 ### [S09: Chi-Square and Categorical Data Analysis](s09.qmd) {#sec-s09-link}
 
 ::: {.callout-tip}
-**Key Concept**: Chi-square tests relationships between categorical variables.
+## Key Concept
+Chi-square tests relationships between categorical variables.
 :::
 
 ### [S10: Linear Regression and ANCOVA](s10.qmd) {#sec-s10-link}
 
 ::: {.callout-tip}
-**Key Concept**: Regression models relationships while controlling for confounders.
+## Key Concept
+Regression models relationships while controlling for confounders.
 :::
 
 ### [S11: Logistic Regression](s11.qmd) {#sec-s11-link}
 
 ::: {.callout-tip}
-**Key Concept**: Logistic regression for binary outcomes (success/failure, disease/no disease).
+## Key Concept
+Logistic regression for binary outcomes (success/failure, disease/no disease).
 :::
 
 ### [S12: Misc](s12.qmd) {#sec-s12-link}
 
 ::: {.callout-tip}
-**Key Concept**: Miscellaneous.
+## Key Concept
+Miscellaneous.
 :::
 
 ## Interactive Learning Features
