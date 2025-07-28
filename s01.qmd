@@ -70,8 +70,10 @@ CSV (Comma-Separated Values) files are the gold standard for data sharing in res
 - **Lightweight**: Smaller file sizes compared to proprietary formats
 - **No licensing dependencies**: Don't require specific software to access
 
+::: {.callout-important}
+## DATA HAS BEEN LOADED ALREDY
 For this course, all data has been _manually entered_ in the background to ensure compatibility with the webR environment.
-
+:::
 
 ```{webr-r}
 # Load packages first
@@ -205,6 +207,31 @@ print(summary_stats)
 
 **Clinical Insight**: This table format is standard for medical journals' "Table 1" showing baseline characteristics by treatment group.
 
+The `gtsummary` package can render a beautiful Table1, but its output cannot be rendered properly as the output here. Try this code in your local machine: 
+
+```r
+# Note: This code will not run in webR environment
+# summary table by exercise group
+summary_table <- diet_labeled %>%
+  select(exercise_label, sex_label, kcal3, prot3gm, fat3gm, cho3gm) %>%
+  tbl_summary(
+    by = exercise_label,
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    digits = all_continuous() ~ 1,
+    label = list(
+      sex_label ~ "Sex",
+      kcal3 ~ "Kilocalories/day",
+      prot3gm ~ "Protein (g/day)",
+      fat3gm ~ "Fat (g/day)", 
+      cho3gm ~ "Carbohydrates (g/day)"
+    )
+  ) %>%
+  add_overall()
+```
+
 ## Key Takeaways
 
 ::: {.callout-tip}
@@ -218,9 +245,9 @@ print(summary_stats)
 2. **Essential R packages for medical research**:
    - `haven`: import SPSS/SAS/Stata files
    - `ggplot2`: create publication-quality figures
-   - `gtsummary`: generate professional statistical tables
+   - `gtsummary`: generate professional statistical tables (local computer)
 
-3. **The pipe operator (%>%) improves code readability**: "Take data, then group, then summarize"
+3. **The pipe operator (%>%) improves code readability**: "Take data, _then_ group, _then_ summarize"
 
 4. **Professional presentation matters**: Use proper labels, appropriate statistics, and clear visualizations
 :::
@@ -228,6 +255,7 @@ print(summary_stats)
 
 ## Next Steps
 
-In [S02: Power Analysis and Sample Size](s02.qmd), we'll learn how to:
+In [S02: Power Analysis and Sample Size](s02.qmd), we'll review how to:
+
 - Calculate statistical power for study planning
 - Determine appropriate sample sizes for different study designs
