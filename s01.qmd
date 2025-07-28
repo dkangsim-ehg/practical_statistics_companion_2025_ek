@@ -48,7 +48,7 @@ diet_data <- data.frame(
 
 In practice, you would import your data from external files. Here's how you would typically handle different file formats:
 
-```{md}
+```{r}
 # Note: This code will not run in webR environment
 library(haven)  # Import SAS, Stata, SPSS files
 diet_data <- read_sav("https://raw.githubusercontent.com/dkangsim-ehg/practical_statistics_companion_2025_ek/main/Diet45Ex.sav") %>%
