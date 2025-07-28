@@ -61,6 +61,7 @@ webr:
     - "broom"
     - "car"
     - "pwr"
+    - "gtsummary"
   autoload-packages: true
 
 execute:
