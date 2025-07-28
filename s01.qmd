@@ -1,4 +1,16 @@
-# Session 1: Concepts of Measurement {#sec-measurement}
+# S01: Concepts of Measurement {#sec-s01}
+
+Understanding the type of data you're working with is the foundation of all statistical analysis. In research, this knowledge determines which statistical methods are appropriate and how to interpret your results correctly.
+
+## Essential R packages
+
+Before diving into measurement concepts, let's introduce three key packages. 
+
+**haven**: imports data from SPSS, SAS, and Stata files (e.g., read_sav(), read_dta(), etc)
+
+**ggplot2**: grammar of graphics for creating visualizations
+
+**gtsummary**: grammar of tables for creating statistical summaries (aka table1)
 
 ```{webr-r}
 #| context: setup
@@ -13,7 +25,8 @@ options(
   scipen = 999,
   width = 80
 )
-#create data (diet45ex.sav)
+
+# Create data (diet45ex.sav)
 diet_data <- data.frame(
   ID = c(15, 16, 17, 18, 19),
   Sex = factor(c(0, 0, 0, 0, 0)),
@@ -30,16 +43,6 @@ diet_data <- data.frame(
   Exercise_Sex = factor(c(1, 1, 2, 1, 3))
 )
 ```
-
-## Essential R packages
-
-Before diving into measurement concepts, let's introduce three key packages. 
-
-**haven**: imports data from SPSS, SAS, and Stata files (e.g., read_sav(), read_dta(), etc)
-
-**ggplot2**: grammar of graphics for creating visualizations
-
-**gtsummary**: grammar of tables for creating statistical summaries (aka table1)
 
 ## Data Import Considerations for Reproducible Research
 
@@ -219,3 +222,10 @@ print(summary_table)
 
 4. **Professional presentation matters**: Use proper labels, appropriate statistics, and clear visualizations
 :::
+
+
+## Next Steps
+
+In [S02: Power Analysis and Sample Size](s02.qmd), we'll learn how to:
+- Calculate statistical power for study planning
+- Determine appropriate sample sizes for different study designs
