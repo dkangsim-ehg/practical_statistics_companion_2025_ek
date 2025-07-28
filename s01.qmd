@@ -176,29 +176,31 @@ paste("Mean caloric intake:", mean_calories, "kcal/day")
 ### Descriptive statistics table
 
 ```{webr-r}
-# Create comprehensive summary table by exercise group
-summary_table <- diet_labeled %>%
-  select(exercise_label, sex_label, kcal3, prot3gm, fat3gm, cho3gm) %>%
-  tbl_summary(
-    by = exercise_label,
-    statistic = list(
-      all_continuous() ~ "{mean} ({sd})",
-      all_categorical() ~ "{n} ({p}%)"
-    ),
-    digits = all_continuous() ~ 1,
-    label = list(
-      sex_label ~ "Sex",
-      kcal3 ~ "Kilocalories/day",
-      prot3gm ~ "Protein (g/day)",
-      fat3gm ~ "Fat (g/day)", 
-      cho3gm ~ "Carbohydrates (g/day)"
-    )
+# Create a simple, readable summary table
+summary_stats <- diet_labeled %>%
+  group_by(exercise_label) %>%
+  summarise(
+    n = n(),
+    mean_kcal = round(mean(kcal3), 1),
+    sd_kcal = round(sd(kcal3), 1),
+    mean_protein = round(mean(prot3gm), 1),
+    sd_protein = round(sd(prot3gm), 1),
+    mean_fat = round(mean(fat3gm), 1),
+    sd_fat = round(sd(fat3gm), 1),
+    mean_carbs = round(mean(cho3gm), 1),
+    sd_carbs = round(sd(cho3gm), 1),
+    .groups = 'drop'
   ) %>%
-  add_overall() %>%
-  modify_header(label ~ "**Characteristic**") %>%
-  modify_spanning_header(c("stat_1", "stat_2", "stat_3") ~ "**Exercise Group**")
+  # Create formatted columns
+  mutate(
+    Calories = paste0(mean_kcal, " (", sd_kcal, ")"),
+    Protein = paste0(mean_protein, " (", sd_protein, ")"),
+    Fat = paste0(mean_fat, " (", sd_fat, ")"),
+    Carbs = paste0(mean_carbs, " (", sd_carbs, ")")
+  ) %>%
+  select(Group = exercise_label, N = n, Calories, Protein, Fat, Carbs)
 
-print(summary_table)
+print(summary_stats)
 ```
 
 **Clinical Insight**: This table format is standard for medical journals' "Table 1" showing baseline characteristics by treatment group.
