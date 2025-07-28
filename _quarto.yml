@@ -11,10 +11,30 @@ website:
     left:
       - href: index.qmd
         text: "Home"
-      - href: session1.qmd
-        text: "Session 1: Measurement"  
-      - href: session3.qmd
-        text: "Session 3: Descriptive Statistics"
+      - href: s01.qmd
+        text: "S01"
+      - href: s02.qmd
+        text: "S02"
+      - href: s03.qmd
+        text: "S03"
+      - href: s04.qmd
+        text: "S04"
+      - href: s05.qmd
+        text: "S05"
+      - href: s06.qmd
+        text: "S06"
+      - href: s07.qmd
+        text: "S07"
+      - href: s08.qmd
+        text: "S08"
+      - href: s09.qmd
+        text: "S09"
+      - href: s10.qmd
+        text: "S10"
+      - href: s11.qmd
+        text: "S11"
+      - href: s12.qmd
+        text: "S12"
     
   page-footer:
     left: "Interactive R Companion for SPSS Users"
@@ -38,6 +58,9 @@ webr:
     - "tidyr" 
     - "ggplot2"
     - "stringr"
+    - "broom"
+    - "car"
+    - "pwr"
   autoload-packages: true
 
 execute:
