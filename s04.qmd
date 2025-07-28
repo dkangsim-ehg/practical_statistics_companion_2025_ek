@@ -1,0 +1,3 @@
+# Session 4: Statistical Inference {#sec-descriptive}
+
+Work in progress
