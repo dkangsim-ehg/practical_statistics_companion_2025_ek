@@ -207,7 +207,7 @@ print(summary_stats)
 
 The `gtsummary` package can render a beautiful Table1, but its output cannot be rendered properly as the output here. Try this code in your local machine: 
 
-```r
+```{webr-r}
 # Note: This code will not run in webR environment
 # summary table by exercise group
 summary_table <- diet_labeled %>%
@@ -227,7 +227,113 @@ summary_table <- diet_labeled %>%
       cho3gm ~ "Carbohydrates (g/day)"
     )
   ) %>%
+  add_overall()%>%
+# Convert to kable for webR compatibility
+  as_kable_extra(
+    booktabs = TRUE,
+    longtable = FALSE
+  ) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover"),
+    full_width = FALSE
+  )
+
+# Print the table
+summary_table
+```
+
+```{webr-r}
+ummary_tibble <- diet_labeled %>%
+  select(exercise_label, sex_label, kcal3, prot3gm, fat3gm, cho3gm) %>%
+  tbl_summary(
+    by = exercise_label,
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    digits = all_continuous() ~ 1,
+    label = list(
+      sex_label ~ "Sex",
+      kcal3 ~ "Kilocalories/day",
+      prot3gm ~ "Protein (g/day)",
+      fat3gm ~ "Fat (g/day)", 
+      cho3gm ~ "Carbohydrates (g/day)"
+    )
+  ) %>%
+  add_overall() %>%
+  # Convert to tibble for clean display
+  as_tibble()
+
+# Print as formatted table
+knitr::kable(summary_tibble, format = "markdown")
+```
+
+```{webr-r}
+#| output: asis
+#| warning: false
+#| message: false
+
+# With new Quarto v1.5.0, try direct gtsummary rendering
+summary_table <- diet_labeled %>%
+  select(exercise_label, sex_label, kcal3, prot3gm, fat3gm, cho3gm) %>%
+  tbl_summary(
+    by = exercise_label,
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    digits = all_continuous() ~ 1,
+    label = list(
+      sex_label ~ "Sex",
+      kcal3 ~ "Kilocalories/day",
+      prot3gm ~ "Protein (g/day)",
+      fat3gm ~ "Fat (g/day)", 
+      cho3gm ~ "Carbohydrates (g/day)"
+    )
+  ) %>%
   add_overall()
+
+# Explicitly print with show_header_names = FALSE for cleaner output
+print(summary_table, include = everything())
+```
+
+
+```{webr-r}
+library(DT)
+
+# Create formatted data for DT display
+dt_summary <- diet_labeled %>%
+  group_by(exercise_label, sex_label) %>%
+  summarise(
+    n = n(),
+    `Mean Calories` = round(mean(kcal3, na.rm = TRUE), 1),
+    `Mean Protein (g)` = round(mean(prot3gm, na.rm = TRUE), 1),
+    `Mean Fat (g)` = round(mean(fat3gm, na.rm = TRUE), 1),
+    `Mean Carbs (g)` = round(mean(cho3gm, na.rm = TRUE), 1),
+    .groups = 'drop'
+  ) %>%
+  rename(
+    `Exercise Group` = exercise_label,
+    `Sex` = sex_label,
+    `N` = n
+  )
+
+# Create interactive table
+datatable(
+  dt_summary,
+  caption = "Nutritional Intake by Exercise Group and Sex",
+  options = list(
+    pageLength = 10,
+    autoWidth = TRUE,
+    scrollX = TRUE,
+    dom = 't'  # Show only table
+  ),
+  rownames = FALSE
+) %>%
+  formatRound(
+    columns = c("Mean Calories", "Mean Protein (g)", "Mean Fat (g)", "Mean Carbs (g)"),
+    digits = 1
+  )
 ```
 
 ## Key Takeaways
