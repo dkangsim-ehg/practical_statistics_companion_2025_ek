@@ -278,6 +278,7 @@ knitr::kable(summary_tibble, format = "html", escape=FALSE)
 ```
 
 ```{webr-r}
+library(htmltools)
 #step1: create gtsummary and get html output
 
 gtsummary_html <- diet_labeled %>%
@@ -304,9 +305,7 @@ gtsummary_html <- diet_labeled %>%
   gt::as_raw_html()
 
 #step 2: wrap in for quarto processing
-quarto_table <- tbl_qmd_span(gtsummary_html)
-
-cat(quarto_table
+HTML(as.character(gtsummary_html))
 ```
 
 
