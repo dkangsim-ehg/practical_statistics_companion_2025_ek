@@ -239,6 +239,8 @@ If you want to test gtsummary() out, run the code below. Its output will be raw 
 :::
 
 ```{webr-r}
+
+#| results: asis
 #step1: create gtsummary and get html output
 
 gtsummary_html <- diet_labeled %>%
@@ -259,9 +261,9 @@ gtsummary_html <- diet_labeled %>%
     )
   ) %>%
   add_overall()%>%
-  add_p()
+  add_p()%>%as_gt()
 
-print(gtsummary_html)
+print(gtsummary_html, view=FALSE)
 
 #step2: go to https://html.onlineviewer.net, and paste the html code
 
