@@ -228,57 +228,17 @@ summary_table <- diet_labeled %>%
     )
   ) %>%
   add_overall()%>%
-# Convert to kable for webR compatibility
-  as_kable_extra(
-    booktabs = TRUE,
-    longtable = FALSE
-  ) %>%
-  kable_styling(
-    bootstrap_options = c("striped", "hover"),
-    full_width = FALSE
+  add_p()
   )
 
 # Print the table
 summary_table
 ```
+::: {.callout-tip}
+If you want to test gtsummary() out, run the code below. Its output will be raw HTML text; copy and paste that into the HTML online viewer. 
+:::
 
 ```{webr-r}
-summary_tibble <- diet_labeled %>%
-  select(exercise_label, sex_label, kcal3, prot3gm, fat3gm, cho3gm) %>%
-  tbl_summary(
-    by = exercise_label,
-    statistic = list(
-      all_continuous() ~ "{mean} ({sd})",
-      all_categorical() ~ "{n} ({p}%)"
-    ),
-    digits = all_continuous() ~ 1,
-    label = list(
-      sex_label ~ "Sex",
-      kcal3 ~ "Kilocalories/day",
-      prot3gm ~ "Protein (g/day)",
-      fat3gm ~ "Fat (g/day)", 
-      cho3gm ~ "Carbohydrates (g/day)"
-    )
-  ) %>%
-  add_overall() %>%
-  # Convert to tibble for clean display
-  as_tibble()%>%
-mutate(
-    `**Characteristic**` = tbl_qmd_span(paste0("**", `**Characteristic**`, "**")),
-    across(contains("p.value"), ~ ifelse(
-      !is.na(.x) & as.numeric(.x) < 0.001, 
-      tbl_qmd_span("*p* < 0.001"),
-      tbl_qmd_span(paste0("*p* = ", sprintf("%.3f", as.numeric(.x))))
-    ))
-  )
-
-
-# Print as formatted table
-knitr::kable(summary_tibble, format = "html", escape=FALSE)
-```
-
-```{webr-r}
-library(htmltools)
 #step1: create gtsummary and get html output
 
 gtsummary_html <- diet_labeled %>%
@@ -299,15 +259,18 @@ gtsummary_html <- diet_labeled %>%
     )
   ) %>%
   add_overall()%>%
-  add_p() %>%
-  # Convert to HTML
-  as_gt() %>%
-  gt::as_raw_html()
+  add_p() 
 
-#step 2: wrap in for quarto processing
-HTML(as.character(gtsummary_html))
+print(gtsummary_html)
+
+#step2: go to https://html.onlineviewer.net, and paste the html code
+
 ```
 
+We use this two-step approach for **demonstration ** purposes only, but in RStudio, it should render the output without any problem. 
+
+![RStudio gtsummary output](https://raw.githubusercontent.com/dkangsim-ehg/practical_statistics_companion_2025_ek/main/screenshot.png){fig-align="center" width=70%}
+*Figure: How the gtsummary table appears in RStudio (right) vs. webR raw HTML output (left)*
 
 ## Key Takeaways
 
