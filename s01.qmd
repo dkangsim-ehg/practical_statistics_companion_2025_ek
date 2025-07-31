@@ -262,19 +262,25 @@ summary_tibble <- diet_labeled %>%
   ) %>%
   add_overall() %>%
   # Convert to tibble for clean display
-  as_tibble()
+  as_tibble()%>%
+mutate(
+    `**Characteristic**` = tbl_qmd_span(paste0("**", `**Characteristic**`, "**")),
+    across(contains("p.value"), ~ ifelse(
+      !is.na(.x) & as.numeric(.x) < 0.001, 
+      tbl_qmd_span("*p* < 0.001"),
+      tbl_qmd_span(paste0("*p* = ", sprintf("%.3f", as.numeric(.x))))
+    ))
+  )
+
 
 # Print as formatted table
-knitr::kable(summary_tibble, format = "markdown")
+knitr::kable(summary_tibble, format = "html", escape=FALSE)
 ```
 
 ```{webr-r}
-#| results: asis
-#| echo: true
-#| warning: false
+#step1: create gtsummary and get html output
 
-# With new Quarto v1.5.0, try direct gtsummary rendering
-summary_table <- diet_labeled %>%
+gtsummary_html <- diet_labeled %>%
   select(exercise_label, sex_label, kcal3, prot3gm, fat3gm, cho3gm) %>%
   tbl_summary(
     by = exercise_label,
@@ -291,10 +297,16 @@ summary_table <- diet_labeled %>%
       cho3gm ~ "Carbohydrates (g/day)"
     )
   ) %>%
-  add_overall()
+  add_overall()%>%
+  add_p() %>%
+  # Convert to HTML
+  as_gt() %>%
+  gt::as_raw_html()
 
-# Explicitly print with show_header_names = FALSE for cleaner output
-print(summary_table, include = everything())
+#step 2: wrap in for quarto processing
+quarto_table <- tbl_qmd_span(gtsummary_html)
+
+cat(quarto_table
 ```
 
 
