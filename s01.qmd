@@ -269,8 +269,8 @@ print(gtsummary_html)
 
 We use this two-step approach for **demonstration ** purposes only, but in RStudio, it should render the output without any problem. 
 
-![RStudio gtsummary output](https://raw.githubusercontent.com/dkangsim-ehg/practical_statistics_companion_2025_ek/main/screenshot.png){fig-align="center" width=70%}
-*Figure: How the gtsummary table appears in RStudio (right) vs. webR raw HTML output (left)*
+![RStudio gtsummary output](https://raw.githubusercontent.com/dkangsim-ehg/practical_statistics_companion_2025_ek/main/screenshot.png){fig-align="center" width=90%}
+
 
 ## Key Takeaways
 
@@ -290,8 +290,11 @@ We use this two-step approach for **demonstration ** purposes only, but in RStud
 3. **The pipe operator (%>%) improves code readability**: "Take data, _then_ group, _then_ summarize"
 
 4. **Professional presentation matters**: Use proper labels, appropriate statistics, and clear visualizations
-:::
 
+## Want to Learn More?
+- **For data visualization with ggplot2**: [Data Visualization: A Practical Introduction](https://socviz.co/makeplot.html#makeplot) - Comprehensive guide to creating effective plots
+- **For gtsummary tables**: [gtsummary Documentation](https://www.danieldsjoberg.com/gtsummary/) - Complete reference with examples and tutorials
+:::
 
 ## Next Steps
 
