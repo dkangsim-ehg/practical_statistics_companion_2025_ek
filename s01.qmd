@@ -239,9 +239,6 @@ If you want to test gtsummary() out, run the code below. Its output will be raw 
 :::
 
 ```{webr-r}
-#| results: asis
-
-library(cardx)
 #step1: create gtsummary and get html output
 
 gtsummary_html <- diet_labeled %>%
@@ -263,7 +260,6 @@ gtsummary_html <- diet_labeled %>%
   ) %>%
   add_overall()%>%
   add_p()
-
 
 print(gtsummary_html)
 
