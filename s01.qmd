@@ -240,8 +240,6 @@ If you want to test gtsummary() out, run the code below. Its output will be raw 
 
 ```{webr-r}
 #| results: asis
-#| warning: false
-#| message: false
 
 library(cardx)
 #step1: create gtsummary and get html output
