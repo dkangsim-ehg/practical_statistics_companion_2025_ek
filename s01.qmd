@@ -207,7 +207,7 @@ print(summary_stats)
 
 The `gtsummary` package can render a beautiful Table1, but its output cannot be rendered properly as the output here. Try this code in your local machine: 
 
-```{webr-r}
+```r
 # Note: This code will not run in webR environment
 # summary table by exercise group
 summary_table <- diet_labeled %>%
@@ -243,7 +243,7 @@ summary_table
 ```
 
 ```{webr-r}
-ummary_tibble <- diet_labeled %>%
+summary_tibble <- diet_labeled %>%
   select(exercise_label, sex_label, kcal3, prot3gm, fat3gm, cho3gm) %>%
   tbl_summary(
     by = exercise_label,
@@ -269,9 +269,9 @@ knitr::kable(summary_tibble, format = "markdown")
 ```
 
 ```{webr-r}
-#| output: asis
+#| results: asis
+#| echo: true
 #| warning: false
-#| message: false
 
 # With new Quarto v1.5.0, try direct gtsummary rendering
 summary_table <- diet_labeled %>%
@@ -297,44 +297,6 @@ summary_table <- diet_labeled %>%
 print(summary_table, include = everything())
 ```
 
-
-```{webr-r}
-library(DT)
-
-# Create formatted data for DT display
-dt_summary <- diet_labeled %>%
-  group_by(exercise_label, sex_label) %>%
-  summarise(
-    n = n(),
-    `Mean Calories` = round(mean(kcal3, na.rm = TRUE), 1),
-    `Mean Protein (g)` = round(mean(prot3gm, na.rm = TRUE), 1),
-    `Mean Fat (g)` = round(mean(fat3gm, na.rm = TRUE), 1),
-    `Mean Carbs (g)` = round(mean(cho3gm, na.rm = TRUE), 1),
-    .groups = 'drop'
-  ) %>%
-  rename(
-    `Exercise Group` = exercise_label,
-    `Sex` = sex_label,
-    `N` = n
-  )
-
-# Create interactive table
-datatable(
-  dt_summary,
-  caption = "Nutritional Intake by Exercise Group and Sex",
-  options = list(
-    pageLength = 10,
-    autoWidth = TRUE,
-    scrollX = TRUE,
-    dom = 't'  # Show only table
-  ),
-  rownames = FALSE
-) %>%
-  formatRound(
-    columns = c("Mean Calories", "Mean Protein (g)", "Mean Fat (g)", "Mean Carbs (g)"),
-    digits = 1
-  )
-```
 
 ## Key Takeaways
 
