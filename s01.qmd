@@ -77,14 +77,12 @@ For this course, all data has been _manually entered_ in the background to ensur
 ```{webr-r}
 # Load packages first
 #library(haven)
-library(tidyverse)
-# Quick look at the data structure
-str(diet_data)
-
+#library(tidyverse)
 # Show first 8 rows
 print(head(diet_data, 8))
 ```
-## Exercise: Data labels for categorical variables
+
+## Data labels for categorical variables
 
 ```{webr-r}
 # Create meaningful labels for categorical variables
@@ -175,73 +173,12 @@ paste("Mean caloric intake:", mean_calories, "kcal/day")
 
 ### Descriptive statistics table
 
-```{webr-r}
-# Create a simple, readable summary table
-summary_stats <- diet_labeled %>%
-  group_by(exercise_label) %>%
-  summarise(
-    n = n(),
-    mean_kcal = round(mean(kcal3), 1),
-    sd_kcal = round(sd(kcal3), 1),
-    mean_protein = round(mean(prot3gm), 1),
-    sd_protein = round(sd(prot3gm), 1),
-    mean_fat = round(mean(fat3gm), 1),
-    sd_fat = round(sd(fat3gm), 1),
-    mean_carbs = round(mean(cho3gm), 1),
-    sd_carbs = round(sd(cho3gm), 1),
-    .groups = 'drop'
-  ) %>%
-  # Create formatted columns
-  mutate(
-    Calories = paste0(mean_kcal, " (", sd_kcal, ")"),
-    Protein = paste0(mean_protein, " (", sd_protein, ")"),
-    Fat = paste0(mean_fat, " (", sd_fat, ")"),
-    Carbs = paste0(mean_carbs, " (", sd_carbs, ")")
-  ) %>%
-  select(Group = exercise_label, N = n, Calories, Protein, Fat, Carbs)
-
-print(summary_stats)
-```
-
-**Data Insight**: This table format is standard for medical journals' "Table 1" showing baseline characteristics by treatment group.
-
-The `gtsummary` package can render a beautiful Table1, but its output cannot be rendered properly as the output here. Try this code in your local machine: 
-
-```r
-# Note: This code will not run in webR environment
-# summary table by exercise group
-summary_table <- diet_labeled %>%
-  select(exercise_label, sex_label, kcal3, prot3gm, fat3gm, cho3gm) %>%
-  tbl_summary(
-    by = exercise_label,
-    statistic = list(
-      all_continuous() ~ "{mean} ({sd})",
-      all_categorical() ~ "{n} ({p}%)"
-    ),
-    digits = all_continuous() ~ 1,
-    label = list(
-      sex_label ~ "Sex",
-      kcal3 ~ "Kilocalories/day",
-      prot3gm ~ "Protein (g/day)",
-      fat3gm ~ "Fat (g/day)", 
-      cho3gm ~ "Carbohydrates (g/day)"
-    )
-  ) %>%
-  add_overall()%>%
-  add_p()
-  )
-
-# Print the table
-summary_table
-```
-::: {.callout-tip}
-If you want to test gtsummary() out, run the code below. Its output will be raw HTML text; copy and paste that into the HTML online viewer. 
-:::
+The `gtsummary` package can render a beautiful Table1
 
 ```{webr-r}
 
 #| results: asis
-#step1: create gtsummary and get html output
+library(cardx)
 
 gtsummary_html <- diet_labeled %>%
   select(exercise_label, sex_label, kcal3, prot3gm, fat3gm, cho3gm) %>%
@@ -261,18 +198,13 @@ gtsummary_html <- diet_labeled %>%
     )
   ) %>%
   add_overall()%>%
-  add_p()%>%as_gt()
+  add_p()%>%
+  as_gt() # you can also convert the object to flextable and save it in word document. 
 
 print(gtsummary_html, view=FALSE)
 
-#step2: go to https://html.onlineviewer.net, and paste the html code
-
 ```
-
-We use this two-step approach for **demonstration ** purposes only, but in RStudio, it should render the output without any problem. 
-
-![RStudio gtsummary output](https://raw.githubusercontent.com/dkangsim-ehg/practical_statistics_companion_2025_ek/main/screenshot.png){fig-align="center" width=90%}
-
+**Data Insight**: This table format is standard for medical journals' "Table 1" showing baseline characteristics by treatment group.
 
 ## Key Takeaways
 
