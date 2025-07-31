@@ -239,6 +239,7 @@ If you want to test gtsummary() out, run the code below. Its output will be raw 
 :::
 
 ```{webr-r}
+library(flextable)
 #step1: create gtsummary and get html output
 
 gtsummary_html <- diet_labeled %>%
@@ -259,7 +260,9 @@ gtsummary_html <- diet_labeled %>%
     )
   ) %>%
   add_overall()%>%
-  add_p() 
+  add_p()%>% 
+  as_flex_table()
+
 
 print(gtsummary_html)
 
